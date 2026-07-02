@@ -23,6 +23,23 @@ IS_SEGMENTS = {
     "2024": (dt.datetime(2024, 1, 1, tzinfo=UTC), dt.datetime(2024, 12, 31, 23, 59, 59, tzinfo=UTC)),
 }
 
+
+def _ms(d: dt.datetime) -> int:
+    return int(d.timestamp() * 1000)
+
+
+# epoch-ms mirrors of the above, for comparisons against numpy datetime64
+# arrays (polars .to_numpy() on a tz-aware column drops to bare datetime64,
+# which raises TypeError if compared against a tz-aware Python datetime -
+# comparing plain integers sidesteps that entirely).
+STUDY_START_MS = _ms(STUDY_START)
+STUDY_END_MS = _ms(STUDY_END)
+IS_START_MS = _ms(IS_START)
+IS_END_MS = _ms(IS_END)
+OOS_START_MS = _ms(OOS_START)
+OOS_END_MS = _ms(OOS_END)
+IS_SEGMENTS_MS = {name: (_ms(start), _ms(end)) for name, (start, end) in IS_SEGMENTS.items()}
+
 BOOKDEPTH_START = dt.datetime(2023, 1, 1, tzinfo=UTC)  # archive coverage begins here (Phase 0 finding)
 
 BAR_MINUTES = 5

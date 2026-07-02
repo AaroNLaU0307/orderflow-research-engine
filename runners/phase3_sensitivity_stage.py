@@ -22,7 +22,22 @@ from orderflow.config import IS_END, IS_START  # noqa: E402
 ROOT = Path(__file__).resolve().parents[1]
 RETAIN_DIR = ROOT / "data" / "raw_retained" / "BTCUSDT" / "aggTrades"
 OUT_DIR = ROOT / "data" / "parquet_sensitivity"
+MANIFEST_PATH = ROOT / "data" / "manifest.json"
 SYMBOL = "BTCUSDT"
+
+# Known monthly-archive gaps within the IS period (from data/qa_ingest_log.jsonl,
+# Phase 2 QA) - the raw_retained zips are the ORIGINAL monthly files, not the
+# QA-repaired ones the primary store uses. Applying the same backfill here
+# keeps all four sensitivity configs built from equally-complete data, so
+# "one factor at a time" only ever varies the factor under test, never data
+# completeness alongside it.
+KNOWN_GAPS = {
+    (2022, 8): [28, 29, 30],
+    (2022, 9): [1, 10],
+    (2022, 10): [29],
+    (2022, 11): [7, 14],
+    (2023, 5): [9],
+}
 
 CONFIGS = {
     "delta10_bar5m": {"delta": 10.0, "bar_ms": 5 * 60_000},
@@ -62,12 +77,17 @@ def run() -> None:
 
     partials = {name: {"bars": [], "buckets": []} for name in CONFIGS}
     tmp_dir = ROOT / "data" / "raw" / "BTCUSDT" / "sensitivity_extract"
+    manifest = etl.Manifest.load(MANIFEST_PATH)
 
     for year, month in months:
         csv_path = extract_from_retained(year, month, tmp_dir)
         if csv_path is None:
             continue
         trades = etl.read_aggtrades(csv_path)
+        gap_days = KNOWN_GAPS.get((year, month))
+        if gap_days:
+            trades, still_missing = etl.backfill_missing_days(trades, SYMBOL, year, month, gap_days, ROOT / "data" / "raw" / SYMBOL, manifest)
+            log(f"  {year:04d}-{month:02d}: applied known backfill for days {gap_days} (still_missing={still_missing})")
         for name, cfg in CONFIGS.items():
             bars, buckets = footprint.aggregate_month(trades, delta=cfg["delta"], bar_ms=cfg["bar_ms"])
             partials[name]["bars"].append(bars)

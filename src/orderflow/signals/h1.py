@@ -9,12 +9,20 @@ from orderflow.events import assemble_events
 from orderflow.rolling import gather_or_nan, last_true_index_strictly_before
 
 
-def detect(bars: pl.DataFrame) -> pl.DataFrame:
+def detect(
+    bars: pl.DataFrame,
+    cumdelta_window: int = H1_CUMDELTA_WINDOW,
+    sigma_window: int = H1_SIGMA_WINDOW,
+    high_window: int = H24_HIGH_WINDOW,
+) -> pl.DataFrame:
+    """Window sizes default to the preregistered 5-minute-bar convention;
+    override to run the section-8 sensitivity grid at a different bar
+    duration with wall-clock-preserving rescaled windows."""
     b = bars.sort("bar_index").with_columns(
         [
-            pl.col("delta").rolling_sum(window_size=H1_CUMDELTA_WINDOW).alias("cumD24"),
-            pl.col("close").rolling_max(window_size=H24_HIGH_WINDOW).alias("roll_max24"),
-            pl.col("close").rolling_min(window_size=H24_HIGH_WINDOW).alias("roll_min24"),
+            pl.col("delta").rolling_sum(window_size=cumdelta_window).alias("cumD24"),
+            pl.col("close").rolling_max(window_size=high_window).alias("roll_max24"),
+            pl.col("close").rolling_min(window_size=high_window).alias("roll_min24"),
         ]
     )
     b = b.with_columns(
@@ -23,7 +31,7 @@ def detect(bars: pl.DataFrame) -> pl.DataFrame:
             (pl.col("close") == pl.col("roll_min24")).alias("is_24h_low"),
         ]
     )
-    b = b.with_columns(pl.col("cumD24").shift(1).rolling_std(window_size=H1_SIGMA_WINDOW).alias("sigma"))
+    b = b.with_columns(pl.col("cumD24").shift(1).rolling_std(window_size=sigma_window).alias("sigma"))
 
     bar_index = b["bar_index"].to_numpy()
     cumD24 = b["cumD24"].to_numpy()

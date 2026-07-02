@@ -22,12 +22,17 @@ def _group_buckets_by_bar(buckets: pl.DataFrame) -> dict[int, list[tuple[float, 
     return by_bar
 
 
-def detect(bars: pl.DataFrame, buckets: pl.DataFrame) -> pl.DataFrame:
+def detect(
+    bars: pl.DataFrame,
+    buckets: pl.DataFrame,
+    volume_window: int = H6_VOLUME_WINDOW,
+    high_window: int = H24_HIGH_WINDOW,
+) -> pl.DataFrame:
     b = bars.sort("bar_index").with_columns(
         [
-            pl.col("volume").shift(1).rolling_quantile(quantile=H6_VOLUME_PCTL, window_size=H6_VOLUME_WINDOW).alias("p95_2016"),
-            pl.col("close").rolling_max(window_size=H24_HIGH_WINDOW).alias("roll_max24"),
-            pl.col("close").rolling_min(window_size=H24_HIGH_WINDOW).alias("roll_min24"),
+            pl.col("volume").shift(1).rolling_quantile(quantile=H6_VOLUME_PCTL, window_size=volume_window).alias("p95_2016"),
+            pl.col("close").rolling_max(window_size=high_window).alias("roll_max24"),
+            pl.col("close").rolling_min(window_size=high_window).alias("roll_min24"),
         ]
     )
     b = b.with_columns(

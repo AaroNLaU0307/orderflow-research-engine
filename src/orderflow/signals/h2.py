@@ -23,13 +23,13 @@ def _group_buckets_by_bar(buckets: pl.DataFrame) -> dict[int, list[tuple[float, 
     return by_bar
 
 
-def detect(bars: pl.DataFrame, buckets: pl.DataFrame, delta: float) -> pl.DataFrame:
+def detect(bars: pl.DataFrame, buckets: pl.DataFrame, delta: float, volume_window: int = H2_VOLUME_WINDOW) -> pl.DataFrame:
     bars = bars.sort("bar_index")
     n_bars = bars.height
 
     total_vol = (buckets["buy_vol"] + buckets["sell_vol"]).to_numpy()
     med96 = rolling_pooled_percentile(
-        buckets["bar_index"].to_numpy(), total_vol, n_bars, H2_VOLUME_WINDOW, 0.5
+        buckets["bar_index"].to_numpy(), total_vol, n_bars, volume_window, 0.5
     )
 
     by_bar = _group_buckets_by_bar(buckets)

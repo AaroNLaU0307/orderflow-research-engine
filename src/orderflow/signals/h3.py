@@ -46,12 +46,12 @@ def _longest_run(flags: list[bool], ratios: list[float]) -> tuple[int, int, floa
     return best
 
 
-def detect(bars: pl.DataFrame, buckets: pl.DataFrame, delta: float) -> pl.DataFrame:
+def detect(bars: pl.DataFrame, buckets: pl.DataFrame, delta: float, volume_window: int = H3_VOLUME_WINDOW) -> pl.DataFrame:
     bars = bars.sort("bar_index")
     n_bars = bars.height
 
     total_vol = (buckets["buy_vol"] + buckets["sell_vol"]).to_numpy()
-    p25_96 = rolling_pooled_percentile(buckets["bar_index"].to_numpy(), total_vol, n_bars, H3_VOLUME_WINDOW, 0.25)
+    p25_96 = rolling_pooled_percentile(buckets["bar_index"].to_numpy(), total_vol, n_bars, volume_window, 0.25)
 
     by_bar = _group_by_bar_level(buckets, delta)
 

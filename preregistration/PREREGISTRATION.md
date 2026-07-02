@@ -1,11 +1,12 @@
 # Pre-Registration — Order Flow Research Engine v1
 
-**Status:** DRAFT, pending sign-off. No forward return or PnL computation may occur
-until this document receives the exact reply "prereg approved". After that reply,
-every definition below is frozen; any unavoidable change is logged in
+**Status:** APPROVED 2026-07-02, following one required revision to §6.5
+(the horizon-selection rule, Appendix A resolution 2). Every definition below
+is now frozen; any unavoidable change is logged in
 [`DEVIATIONS.md`](DEVIATIONS.md), never made silently.
 
-**Version:** v1.0
+**Version:** v1.1 (v1.0 was the pre-review draft; v1.1 incorporates the
+ratified Appendix A resolutions, most substantively the §6.5 rewrite)
 **Date:** 2026-07-02
 **Canonical source brief:** [`docs/BRIEF.md`](../docs/BRIEF.md) (verbatim, committed Phase 1)
 **Phase 0 audit:** [`reports/DATA_AUDIT.md`](../reports/DATA_AUDIT.md)
@@ -230,12 +231,13 @@ positive-only narrative:
   detectable information at this sample size. Reported as: *"no confirmable
   edge, informational null."*
 - **(b) Economic null:** the signal clears BH-FDR (real, non-zero information
-  content) but fails the materiality gate (mean signed gross return at the
-  best FDR-significant horizon < 1.5× round-trip cost) or the year-consistency
-  gate (sign flips in ≥2 of 3 IS segments). This is a *stronger and more
-  interesting* failure mode than (a): information exists, but it is too small,
-  too inconsistent, or too fragile to survive real trading frictions or
-  regime change. Reported as: *"real but uneconomic / unstable edge."*
+  content) but fails gate 3 (the eligible-horizon set E(signal) is empty — no
+  FDR-significant, ≥30m horizon reaches 1.5× round-trip cost) or gate 4 (sign
+  flips in ≥2 of 3 IS segments at the promoted horizon h*, §6.5). This is a
+  *stronger and more interesting* failure mode than (a): information exists,
+  but it is too small, too inconsistent, or too fragile to survive real
+  trading frictions or regime change. Reported as: *"real but uneconomic /
+  unstable edge."*
 - **(c) Underpowered:** fewer than 300 deduplicated IS events. No promotion
   decision can be responsibly made either way at this sample size. Reported as
   *"insufficient events to evaluate,"* explicitly not conflated with (a) or (b).
@@ -404,25 +406,47 @@ replication check of an already-selected finding.)
 
 The brief's "≥2 of the ≥2.5 in-sample calendar years" is operationalized as
 three discrete IS segments: **2022 H2** (2022-07-01 to 2022-12-31, a half-year
-segment), **2023** (full year), **2024** (full year). At the best
-FDR-significant horizon for a signal, the mean signed return within each of
-these 3 segments is computed independently; the gate requires the **same
-sign** in at least **2 of the 3** segments.
+segment), **2023** (full year), **2024** (full year). The gate requires the
+**same sign** of the mean signed return in at least **2 of the 3** segments,
+evaluated at the signal's promoted horizon **h\*** — h\* is defined in §6.5
+(its definition depends on gate 3, the economic-materiality gate, so it
+cannot be stated before that gate).
 
-### 6.5 Promotion gates (all four required, restated concretely)
+### 6.5 Promotion gates (all four required)
 
 A signal is promoted to Phase 4 backtest iff **all** of:
 1. **≥ 300** deduplicated IS events (else outcome (c), §2, underpowered).
 2. BH-FDR significant (q < 0.10, within the 20-cell family) at **≥ 2**
    horizons, **at least one of which is ≥ 30 minutes** (i.e., h ∈ {6, 12, 48}).
-3. **Economic materiality:** mean signed *gross* return at the "best" horizon
-   ≥ 1.5 × round-trip cost = **≥ 18 bp**, where "best horizon" is defined as
-   the FDR-significant, ≥30m-eligible horizon with the highest mean signed
-   gross return (this is the same horizon used for gate 2's ≥30m requirement
-   and is also the horizon locked in for the Phase 4 backtest, §7 — see
-   Appendix A for why this single definition is used in both places).
-4. **Year-consistency:** same sign in ≥ 2 of the 3 IS segments (§6.4) at that
-   same best horizon.
+3. **Economic materiality — eligible horizon set.** Define
+   ```
+   E(signal) := { h : h is BH-FDR significant (q < 0.10) in-sample
+                      AND h >= 30m                    (h in {6, 12, 48})
+                      AND mean signed gross return at h >= 18 bp   (1.5x round-trip cost) }
+   ```
+   Gate 3 passes iff **E(signal) is non-empty**. This is a gate on whether the
+   set is empty or not — it does not itself pick a horizon.
+4. **Year-consistency**, evaluated at the promoted horizon h\* (defined
+   immediately below): same sign of mean signed return in ≥ 2 of the 3 IS
+   segments (§6.4).
+
+**Promoted horizon selection (h\*).** For any signal that passes gates 1–3:
+```
+h* := argmax over h in E(signal) of the day-cluster-bootstrap t-statistic at h,
+      i.e. | mean signed gross return at h | / bootstrap standard error at h
+      (ties broken toward the longer horizon)
+```
+h\* is a **deterministic function of E(signal)** — never a free choice made at
+write-up time after seeing the results table. It is the single horizon used
+for: gate 4's year-consistency check (§6.4), the Phase 4 confirmatory
+backtest's exit horizon, the OOS confirmation, and the ETH replication (§7).
+No other horizon is used anywhere downstream of promotion.
+
+This structure deliberately decouples *whether an economic edge exists*
+(gate 3, a test of set non-emptiness) from *which horizon is traded*
+(h\* selection, a deterministic rule with no discretion) — removing what
+would otherwise be the last post-hoc degree of freedom in the promotion
+process (see Appendix A, resolution 2).
 
 Any signal failing any gate is reported per the applicable falsification
 statement in §2 and does **not** proceed to Phase 4.
@@ -463,9 +487,9 @@ that happened to look interesting.
 
 - **Entry:** next bar open after the event bar closes (same reference as the
   event study, §6.1).
-- **Exit:** the fixed **promoted horizon** — the single "best horizon" locked
-  in gate 3 (§6.5) during IS discovery. This horizon is **not** re-selected or
-  re-optimized at backtest time; it is carried forward frozen from discovery.
+- **Exit:** the fixed **promoted horizon h\*** (§6.5) selected during IS
+  discovery. h\* is **not** re-selected or re-optimized at backtest time; it
+  is carried forward frozen from discovery.
 - **Position management:** max 1 concurrent position per signal; if a new
   event fires while a position from an earlier event of the same signal is
   still open, the new event is **skipped** (not queued) — pre-registered, not
@@ -473,7 +497,7 @@ that happened to look interesting.
 - **Sizing:** constant notional per trade.
 - **Net PnL** = gross signed return − taker fees (both sides) − slippage (both
   sides) − funding accrued over the holding period, per §6.6.
-- **Walk-forward structure:** purge = the promoted horizon's bar length;
+- **Walk-forward structure:** purge = h\*'s bar length;
   embargo = 1 day (288 bars), applied between any IS-derived rolling
   threshold (e.g. the trailing volume/bucket percentiles used inside the
   detectors) and the evaluation window. Because every detector parameter is a
@@ -485,9 +509,9 @@ that happened to look interesting.
   reported with a bootstrap CI (stationary block bootstrap on daily PnL,
   block length = 5 days, 10,000 reps, per brief §4.4).
 - **DSR / PSR:** computed with N = 140 (§6.7).
-- **ETH replication:** identical frozen pipeline and identical promoted
-  horizon (not re-optimized for ETH), Δ = 1 USDT bucket grid, promoted
-  signals only. Reported as an independent confirmation-or-failure with its
+- **ETH replication:** identical frozen pipeline and identical h\* (not
+  re-optimized for ETH), Δ = 1 USDT bucket grid, promoted signals only.
+  Reported as an independent confirmation-or-failure with its
   own day-cluster bootstrap CI — outside the FDR family (§6.3), a single
   pre-specified replication check.
 
@@ -534,59 +558,92 @@ empty, ready to receive entries).
 
 ---
 
-## Appendix A — Ambiguity resolutions (please check before approving)
+## Appendix A — Ambiguity resolutions (reviewed and ratified 2026-07-02)
 
 Four places in the source instructions admitted more than one literal
-reading. Each was resolved to a single deterministic rule (required for any
-of this to be implementable without further judgment calls at Phase 2+), and
-is surfaced here explicitly for review:
+reading. Each was resolved to a single deterministic rule, surfaced for
+review before sign-off, and reviewed. Resolutions 1, 3, and 4 were ratified
+as originally drafted; resolution 2 required a substantive rewrite, since its
+original form was promotion-affecting, not cosmetic. Both are recorded below
+with their final rationale.
 
-1. **Segment-boundary purging granularity (§5).** "An event only enters IS
-   statistics if its entire longest forward window (48 bars) completes within
-   IS... dropped for the affected horizons" could be read as (a) per-event
-   admission gated by the longest horizon, extended to all horizons once
-   admitted, or (b) per-event-per-horizon admission, where an event could
-   contribute to short horizons even if its 48-bar window crosses the
-   boundary. **Resolved to (a)** — per-event admission — because it keeps
-   `N_events` identical across all 5 horizons of a cell, which is the cleaner
-   and more standard event-study design (no confound between horizon and
-   sample composition). If (b) was intended, this needs to be corrected
-   before Phase 2.
-2. **"Best FDR-significant horizon" (§6.5 gate 3, §7 backtest horizon).** The
-   brief uses "best" for both the materiality gate and (implicitly) for
-   choosing the backtest exit horizon, without defining "best." **Resolved
-   as:** the FDR-significant, ≥30m-eligible horizon with the highest mean
-   signed *gross* return — used consistently in both places, and frozen as the
-   Phase 4 backtest exit horizon (not re-selected at backtest time).
-3. **H6 magnitude ("volume percentile × |extreme-bucket delta|").** The brief
-   describes this narratively rather than as a formula. **Resolved as:**
-   `(volume[t] / P95_2016[t]) * |combined delta of extreme 2 buckets|` — a
-   volume-multiple-of-threshold, consistent with H2's magnitude style — since
-   magnitude only feeds the non-gating Spearman IC, this choice does not
-   affect any promotion decision, but is stated here for full reproducibility.
-4. **H2's "median bucket volume of the trailing 96 bars" (§2, H2).** Could be
-   read as a per-price-level history (the trailing volume trend of that exact
-   `bucket_px`) or a cross-sectional pool of every bucket in every trailing
-   bar. **Resolved to the cross-sectional pool** — a per-price-level history
-   would frequently be near-empty once price has drifted away from a given
-   bucket over an 8-hour window, making the per-level reading ill-defined in
-   practice. This mirrors H3's `p25_96(t)`, which was already unambiguous in
-   the brief as a cross-sectional trailing percentile, so H2's threshold is
-   defined the same way for internal consistency.
+1. **Segment-boundary purging granularity (§5). RATIFIED — per-event
+   admission.** "An event only enters IS statistics if its entire longest
+   forward window (48 bars) completes within IS... dropped for the affected
+   horizons" admitted two readings: (a) per-event admission gated by the
+   longest horizon, extended to all 5 horizons once admitted, or (b)
+   per-event-per-horizon admission, where a boundary-crossing event could
+   still contribute to shorter horizons. The "dropped for the affected
+   horizons" phrasing that suggested (b) was a leftover drafting artifact from
+   an earlier version of the instruction, not a competing operative rule —
+   the governing clause is the 48-bar whole-window admission test. **(a) is
+   correct**, for a substantive reason beyond just resolving the drafting
+   inconsistency: gate 2 ("BH-FDR significant at ≥2 horizons") is only
+   cleanly interpretable when all 5 horizon cells of a signal share an
+   identical event set — otherwise a horizon could appear significant partly
+   because it drew on a systematically different (e.g. more boundary-adjacent)
+   sample of events than its neighbors. The cost of per-event admission is
+   losing at most one 48-bar window's worth of events (~4 hours) at each of
+   the 2 segment boundaries (IS/OOS split and sample end) — negligible against
+   a multi-year sample.
+2. **"Best FDR-significant horizon" (§6.5 gate 3, §7 backtest horizon).
+   REVISED — replaced with an explicit eligible-set-then-deterministic-h\*
+   rule.** The original resolution ("the FDR-significant, ≥30m-eligible
+   horizon with the highest mean signed gross return") was reviewed and found
+   to be promotion-affecting, not merely a documentation nicety: different
+   defensible tie-break rules (argmax mean return vs. argmin FDR q-value vs.
+   argmax t-statistic) can select different horizons for the *same* results
+   table, and gate 3 as originally phrased ("mean return at the best horizon
+   ≥ 18bp") would then pass or fail depending on which tie-break rule was
+   used — a real post-hoc degree of freedom, exactly what a pre-registration
+   exists to eliminate. **Current rule (§6.5):** gate 3 is restructured to
+   test only whether the eligible horizon set `E(signal)` — every horizon that
+   is simultaneously FDR-significant, ≥30m, and ≥18bp — is non-empty. Set
+   non-emptiness does not depend on any tie-break rule, so gate 3's pass/fail
+   is no longer sensitive to horizon-choice at all. A separate, fully
+   deterministic rule then selects the promoted horizon **h\*** = argmax over
+   `E(signal)` of the day-cluster-bootstrap t-statistic, ties toward the
+   longer horizon — used only for gate 4 (year-consistency) and the
+   downstream backtest/OOS/ETH exit horizon, both of which unavoidably need
+   *some* single horizon and so cannot be made tie-break-free the way gate 3
+   was. This is the strictly stronger fix: it removes the degree of freedom
+   where removal is possible (gate 3) and makes it fully mechanical where a
+   choice is unavoidable (h\*).
+3. **H6 magnitude ("volume percentile × |extreme-bucket delta|"). RATIFIED —
+   non-gating.** The brief describes this narratively rather than as a
+   formula. Resolved as `(volume[t] / P95_2016[t]) * |combined delta of
+   extreme 2 buckets|` — a volume-multiple-of-threshold, consistent with H2's
+   magnitude style. Confirmed low-stakes: magnitude only feeds the
+   non-gating Spearman IC and never affects a promotion decision.
+4. **H2's "median bucket volume of the trailing 96 bars" (§2, H2). RATIFIED —
+   cross-sectional pooled scalar, matching H3's P25 convention.** This was
+   the intended reading: a per-price-level history would frequently be
+   near-empty once price has drifted away from a given bucket over an 8-hour
+   window, making that reading ill-defined in practice; pooling every
+   bucket's volume across every bar in the trailing 96-bar window (as H3's
+   `p25_96(t)` already unambiguously did) is the internally consistent choice.
 
-None of these four resolutions affect the promotion gates' pass/fail
-mechanics in a way that changes which signals could be promoted — they only
-affect exact event admission at segment edges (1) and detector thresholds (4),
-the descriptive IC statistic (3), or standardize which horizon is used
-consistently (2). They are flagged for review, not because they are expected
-to be controversial.
+Resolutions 1, 3, and 4 do not affect which signals could be promoted — they
+govern exact event admission at segment edges (1), a detector threshold (4),
+or a non-gating descriptive statistic (3). Resolution 2's *original* form
+could have changed a promotion outcome; its *current* form (§6.5) removes
+that sensitivity from gate 3 by construction, while h\*'s fully deterministic
+selection still governs gate 4 and the traded horizon, because those two
+uses inherently require picking one specific horizon.
 
 ## Appendix B — Cross-reference: brief → this document
 
 Every operational value in brief §3–§4 is transcribed above with no
-unstated changes, **except** the warm-up correction (§5 of this document,
-brief said 2016 bars / 1 week; corrected to 8640 bars / 30 days) and the
-sensitivity-grid Δ values (§8 of this document locks Δ=10/50 USDT exactly, a
-minor rounding of the brief's "×0.5/×2" formula against the 25 USDT baseline,
-which would give 12.5/50 — the round-number values were specified directly in
-the Phase 1 task and are adopted as given).
+unstated changes, **except**:
+- the warm-up correction (§5 of this document, brief said 2016 bars / 1 week;
+  corrected to 8640 bars / 30 days);
+- the sensitivity-grid Δ values (§8 of this document locks Δ=10/50 USDT
+  exactly, a minor rounding of the brief's "×0.5/×2" formula against the
+  25 USDT baseline, which would give 12.5/50 — the round-number values were
+  specified directly in the Phase 1 task and are adopted as given); and
+- gate 3 / promoted-horizon selection (§6.5 of this document): the brief's
+  "mean signed gross return at the best FDR-significant horizon" is
+  formalized into the eligible-set test `E(signal) != {}` plus a fully
+  deterministic h\* = argmax-bootstrap-t-statistic rule, per Appendix A
+  resolution 2. This is a formalization of an underspecified brief phrase,
+  not a substantive change of intent.

@@ -7,6 +7,7 @@ import numpy as np
 import polars as pl
 
 from orderflow.config import H2_AGGRESSION_FRACTION, H2_VOLUME_MULTIPLE, H2_VOLUME_WINDOW, H2_ZONE_FRACTION
+from orderflow.events import assemble_events
 from orderflow.rolling import rolling_pooled_percentile
 
 
@@ -34,7 +35,6 @@ def detect(bars: pl.DataFrame, buckets: pl.DataFrame, delta: float) -> pl.DataFr
     by_bar = _group_buckets_by_bar(buckets)
 
     bar_index_arr = bars["bar_index"].to_numpy()
-    bar_ts_arr = bars["bar_ts"].to_numpy()
     low_arr = bars["low"].to_numpy()
     high_arr = bars["high"].to_numpy()
     close_arr = bars["close"].to_numpy()
@@ -69,15 +69,8 @@ def detect(bars: pl.DataFrame, buckets: pl.DataFrame, delta: float) -> pl.DataFr
                         best_bear = multiple
 
         if best_bull is not None:
-            rows.append((int(bar_index_arr[i]), bar_ts_arr[i], "H2", 1, float(best_bull)))
+            rows.append((int(bar_index_arr[i]), "H2", 1, float(best_bull)))
         if best_bear is not None:
-            rows.append((int(bar_index_arr[i]), bar_ts_arr[i], "H2", -1, float(best_bear)))
+            rows.append((int(bar_index_arr[i]), "H2", -1, float(best_bear)))
 
-    if not rows:
-        return pl.DataFrame(
-            schema={"bar_index": pl.Int64, "bar_ts": pl.Datetime, "signal": pl.Utf8, "direction": pl.Int8, "magnitude": pl.Float64}
-        )
-    out = pl.DataFrame(
-        rows, schema=["bar_index", "bar_ts", "signal", "direction", "magnitude"], orient="row"
-    ).with_columns(pl.col("direction").cast(pl.Int8))
-    return out.sort("bar_index")
+    return assemble_events(bars, rows)

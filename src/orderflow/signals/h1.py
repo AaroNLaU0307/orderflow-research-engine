@@ -5,6 +5,7 @@ import numpy as np
 import polars as pl
 
 from orderflow.config import H1_CUMDELTA_WINDOW, H1_SIGMA_WINDOW, H24_HIGH_WINDOW
+from orderflow.events import assemble_events
 from orderflow.rolling import gather_or_nan, last_true_index_strictly_before
 
 
@@ -25,7 +26,6 @@ def detect(bars: pl.DataFrame) -> pl.DataFrame:
     b = b.with_columns(pl.col("cumD24").shift(1).rolling_std(window_size=H1_SIGMA_WINDOW).alias("sigma"))
 
     bar_index = b["bar_index"].to_numpy()
-    bar_ts = b["bar_ts"].to_numpy()
     cumD24 = b["cumD24"].to_numpy()
     sigma = b["sigma"].to_numpy()
     is_high = b["is_24h_high"].fill_null(False).to_numpy()
@@ -46,15 +46,8 @@ def detect(bars: pl.DataFrame) -> pl.DataFrame:
 
     rows = []
     for i in np.nonzero(bear_mask)[0]:
-        rows.append((int(bar_index[i]), bar_ts[i], "H1", -1, float(bear_mag[i])))
+        rows.append((int(bar_index[i]), "H1", -1, float(bear_mag[i])))
     for i in np.nonzero(bull_mask)[0]:
-        rows.append((int(bar_index[i]), bar_ts[i], "H1", 1, float(bull_mag[i])))
+        rows.append((int(bar_index[i]), "H1", 1, float(bull_mag[i])))
 
-    if not rows:
-        return pl.DataFrame(
-            schema={"bar_index": pl.Int64, "bar_ts": pl.Datetime, "signal": pl.Utf8, "direction": pl.Int8, "magnitude": pl.Float64}
-        )
-    out = pl.DataFrame(
-        rows, schema=["bar_index", "bar_ts", "signal", "direction", "magnitude"], orient="row"
-    ).with_columns(pl.col("direction").cast(pl.Int8))
-    return out.sort("bar_index")
+    return assemble_events(b, rows)

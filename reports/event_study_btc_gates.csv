@@ -1,0 +1,5 @@
+signal,gate1_min_events,gate2_fdr,gate3_materiality,gate3_eligible_horizons,gate4_year_consistency,gate4_segment_signs,h_star,promoted
+H1,true,false,false,[],false,None,,false
+H2,true,false,false,[],false,None,,false
+H3,false,false,false,[],false,None,,false
+H6,false,false,false,[],false,None,,false

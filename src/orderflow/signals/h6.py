@@ -7,6 +7,7 @@ import numpy as np
 import polars as pl
 
 from orderflow.config import H24_HIGH_WINDOW, H6_VOLUME_PCTL, H6_VOLUME_WINDOW
+from orderflow.events import EMPTY_EVENTS_SCHEMA, assemble_events
 
 
 def _group_buckets_by_bar(buckets: pl.DataFrame) -> dict[int, list[tuple[float, float, float]]]:
@@ -37,7 +38,6 @@ def detect(bars: pl.DataFrame, buckets: pl.DataFrame) -> pl.DataFrame:
     )
 
     bar_index_arr = b["bar_index"].to_numpy()
-    bar_ts_arr = b["bar_ts"].to_numpy()
     volume_arr = b["volume"].to_numpy()
     p95_arr = b["p95_2016"].to_numpy()
     is_high = b["is_24h_high"].fill_null(False).to_numpy()
@@ -48,9 +48,7 @@ def detect(bars: pl.DataFrame, buckets: pl.DataFrame) -> pl.DataFrame:
     bull_candidates = np.nonzero(vol_gate & is_low)[0]
 
     if len(bear_candidates) == 0 and len(bull_candidates) == 0:
-        return pl.DataFrame(
-            schema={"bar_index": pl.Int64, "bar_ts": pl.Datetime, "signal": pl.Utf8, "direction": pl.Int8, "magnitude": pl.Float64}
-        )
+        return pl.DataFrame(schema=EMPTY_EVENTS_SCHEMA)
 
     needed = set(bear_candidates.tolist()) | set(bull_candidates.tolist())
     by_bar = _group_buckets_by_bar(buckets.filter(pl.col("bar_index").is_in(list(needed))))
@@ -66,7 +64,7 @@ def detect(bars: pl.DataFrame, buckets: pl.DataFrame) -> pl.DataFrame:
         combined_delta = sum(bv - sv for _, bv, sv in top2)
         if combined_delta < 0:
             magnitude = (volume_arr[i] / p95_arr[i]) * abs(combined_delta)
-            rows.append((bi, bar_ts_arr[i], "H6", -1, float(magnitude)))
+            rows.append((bi, "H6", -1, float(magnitude)))
 
     for i in bull_candidates:
         bi = int(bar_index_arr[i])
@@ -78,13 +76,6 @@ def detect(bars: pl.DataFrame, buckets: pl.DataFrame) -> pl.DataFrame:
         combined_delta = sum(bv - sv for _, bv, sv in bottom2)
         if combined_delta > 0:
             magnitude = (volume_arr[i] / p95_arr[i]) * abs(combined_delta)
-            rows.append((bi, bar_ts_arr[i], "H6", 1, float(magnitude)))
+            rows.append((bi, "H6", 1, float(magnitude)))
 
-    if not rows:
-        return pl.DataFrame(
-            schema={"bar_index": pl.Int64, "bar_ts": pl.Datetime, "signal": pl.Utf8, "direction": pl.Int8, "magnitude": pl.Float64}
-        )
-    out = pl.DataFrame(
-        rows, schema=["bar_index", "bar_ts", "signal", "direction", "magnitude"], orient="row"
-    ).with_columns(pl.col("direction").cast(pl.Int8))
-    return out.sort("bar_index")
+    return assemble_events(b, rows)

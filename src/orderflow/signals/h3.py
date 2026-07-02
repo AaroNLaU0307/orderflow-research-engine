@@ -7,6 +7,7 @@ import numpy as np
 import polars as pl
 
 from orderflow.config import H3_IMBALANCE_RATIO, H3_MIN_STACK, H3_VOLUME_WINDOW
+from orderflow.events import assemble_events
 from orderflow.rolling import rolling_pooled_percentile
 
 
@@ -55,7 +56,6 @@ def detect(bars: pl.DataFrame, buckets: pl.DataFrame, delta: float) -> pl.DataFr
     by_bar = _group_by_bar_level(buckets, delta)
 
     bar_index_arr = bars["bar_index"].to_numpy()
-    bar_ts_arr = bars["bar_ts"].to_numpy()
     low_arr = bars["low"].to_numpy()
     high_arr = bars["high"].to_numpy()
 
@@ -119,16 +119,9 @@ def detect(bars: pl.DataFrame, buckets: pl.DataFrame, delta: float) -> pl.DataFr
 
         if up_run is not None:
             _, length, mean_ratio = up_run
-            rows.append((int(bar_index_arr[i]), bar_ts_arr[i], "H3", 1, float(length * mean_ratio)))
+            rows.append((int(bar_index_arr[i]), "H3", 1, float(length * mean_ratio)))
         if down_run is not None:
             _, length, mean_ratio = down_run
-            rows.append((int(bar_index_arr[i]), bar_ts_arr[i], "H3", -1, float(length * mean_ratio)))
+            rows.append((int(bar_index_arr[i]), "H3", -1, float(length * mean_ratio)))
 
-    if not rows:
-        return pl.DataFrame(
-            schema={"bar_index": pl.Int64, "bar_ts": pl.Datetime, "signal": pl.Utf8, "direction": pl.Int8, "magnitude": pl.Float64}
-        )
-    out = pl.DataFrame(
-        rows, schema=["bar_index", "bar_ts", "signal", "direction", "magnitude"], orient="row"
-    ).with_columns(pl.col("direction").cast(pl.Int8))
-    return out.sort("bar_index")
+    return assemble_events(bars, rows)

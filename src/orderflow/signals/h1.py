@@ -1,0 +1,60 @@
+"""H1 - Delta divergence. preregistration/PREREGISTRATION.md section 2, H1."""
+from __future__ import annotations
+
+import numpy as np
+import polars as pl
+
+from orderflow.config import H1_CUMDELTA_WINDOW, H1_SIGMA_WINDOW, H24_HIGH_WINDOW
+from orderflow.rolling import gather_or_nan, last_true_index_strictly_before
+
+
+def detect(bars: pl.DataFrame) -> pl.DataFrame:
+    b = bars.sort("bar_index").with_columns(
+        [
+            pl.col("delta").rolling_sum(window_size=H1_CUMDELTA_WINDOW).alias("cumD24"),
+            pl.col("close").rolling_max(window_size=H24_HIGH_WINDOW).alias("roll_max24"),
+            pl.col("close").rolling_min(window_size=H24_HIGH_WINDOW).alias("roll_min24"),
+        ]
+    )
+    b = b.with_columns(
+        [
+            (pl.col("close") == pl.col("roll_max24")).alias("is_24h_high"),
+            (pl.col("close") == pl.col("roll_min24")).alias("is_24h_low"),
+        ]
+    )
+    b = b.with_columns(pl.col("cumD24").shift(1).rolling_std(window_size=H1_SIGMA_WINDOW).alias("sigma"))
+
+    bar_index = b["bar_index"].to_numpy()
+    bar_ts = b["bar_ts"].to_numpy()
+    cumD24 = b["cumD24"].to_numpy()
+    sigma = b["sigma"].to_numpy()
+    is_high = b["is_24h_high"].fill_null(False).to_numpy()
+    is_low = b["is_24h_low"].fill_null(False).to_numpy()
+
+    s_high = last_true_index_strictly_before(is_high)
+    s_low = last_true_index_strictly_before(is_low)
+    cumD24_at_s_high = gather_or_nan(cumD24, s_high)
+    cumD24_at_s_low = gather_or_nan(cumD24, s_low)
+
+    valid = ~np.isnan(sigma)
+
+    bear_mask = is_high & valid & (s_high >= 0) & ~np.isnan(cumD24_at_s_high) & (cumD24 < cumD24_at_s_high - 0.5 * sigma)
+    bull_mask = is_low & valid & (s_low >= 0) & ~np.isnan(cumD24_at_s_low) & (cumD24 > cumD24_at_s_low + 0.5 * sigma)
+
+    bear_mag = np.abs(cumD24 - cumD24_at_s_high) / sigma
+    bull_mag = np.abs(cumD24 - cumD24_at_s_low) / sigma
+
+    rows = []
+    for i in np.nonzero(bear_mask)[0]:
+        rows.append((int(bar_index[i]), bar_ts[i], "H1", -1, float(bear_mag[i])))
+    for i in np.nonzero(bull_mask)[0]:
+        rows.append((int(bar_index[i]), bar_ts[i], "H1", 1, float(bull_mag[i])))
+
+    if not rows:
+        return pl.DataFrame(
+            schema={"bar_index": pl.Int64, "bar_ts": pl.Datetime, "signal": pl.Utf8, "direction": pl.Int8, "magnitude": pl.Float64}
+        )
+    out = pl.DataFrame(
+        rows, schema=["bar_index", "bar_ts", "signal", "direction", "magnitude"], orient="row"
+    ).with_columns(pl.col("direction").cast(pl.Int8))
+    return out.sort("bar_index")

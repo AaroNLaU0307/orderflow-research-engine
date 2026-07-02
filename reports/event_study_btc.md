@@ -23,28 +23,30 @@ Day-cluster bootstrap: 2,000,000 reps (precision amendment - preregistration/DEV
 
 ## Cells
 
-| Signal | Horizon (bars) | N | Mean (bp) | Bootstrap SE (bp) | t | raw p | BH-FDR q=0.10 sig | 95% CI (bp) | Spearman IC |
-|---|---|---|---|---|---|---|---|---|---|
-| H1 | 1 | 4609 | 0.248 | 0.289 | 0.860 | 0.3856 | False | [-0.33, 0.80] | -0.001 |
-| H1 | 3 | 4609 | 0.477 | 0.455 | 1.050 | 0.2930 | False | [-0.43, 1.36] | 0.015 |
-| H1 | 6 | 4609 | 1.543 | 0.596 | 2.588 | 0.0100 | False | [0.37, 2.71] | 0.010 |
-| H1 | 12 | 4608 | 2.121 | 0.825 | 2.571 | 0.0109 | False | [0.49, 3.73] | -0.009 |
-| H1 | 48 | 4608 | 2.327 | 1.424 | 1.634 | 0.1038 | False | [-0.48, 5.10] | -0.004 |
-| H2 | 1 | 783 | -0.484 | 1.084 | -0.446 | 0.6571 | False | [-2.62, 1.63] | 0.057 |
-| H2 | 3 | 783 | 1.074 | 1.444 | 0.743 | 0.4524 | False | [-1.79, 3.87] | 0.026 |
-| H2 | 6 | 783 | 1.450 | 1.975 | 0.734 | 0.4595 | False | [-2.47, 5.28] | 0.045 |
-| H2 | 12 | 783 | 0.880 | 2.731 | 0.322 | 0.7454 | False | [-4.48, 6.22] | 0.067 |
-| H2 | 48 | 783 | -3.683 | 4.605 | -0.800 | 0.4257 | False | [-12.80, 5.25] | 0.016 |
-| H3 | 1 | 62 | 2.654 | 2.761 | 0.961 | 0.3394 | False | [-2.94, 7.88] | -0.177 |
-| H3 | 3 | 62 | -2.479 | 4.314 | -0.575 | 0.5612 | False | [-11.01, 5.90] | 0.053 |
-| H3 | 6 | 62 | 1.410 | 6.847 | 0.206 | 0.8379 | False | [-12.03, 14.81] | -0.016 |
-| H3 | 12 | 62 | -7.666 | 9.503 | -0.807 | 0.4136 | False | [-26.45, 10.80] | 0.037 |
-| H3 | 48 | 62 | 16.003 | 16.975 | 0.943 | 0.3437 | False | [-16.72, 49.83] | 0.011 |
-| H6 | 1 | 286 | 0.649 | 1.997 | 0.325 | 0.7169 | False | [-3.45, 4.38] | -0.000 |
-| H6 | 3 | 286 | -2.456 | 3.464 | -0.709 | 0.4800 | False | [-9.30, 4.28] | -0.025 |
-| H6 | 6 | 286 | -5.405 | 4.249 | -1.272 | 0.1980 | False | [-14.03, 2.62] | -0.014 |
-| H6 | 12 | 286 | -6.554 | 6.514 | -1.006 | 0.3121 | False | [-20.19, 5.35] | -0.014 |
-| H6 | 48 | 286 | -6.175 | 9.271 | -0.666 | 0.5128 | False | [-24.93, 11.41] | 0.025 |
+| Signal | Horizon (bars) | N | Mean (bp) | Bootstrap SE (bp) | t | raw p | BH-FDR q=0.10 sig | 95% CI (bp) | Spearman IC | Rank by p | Operative BH threshold | MC-SE of p-hat | Straddles threshold |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| H1 | 1 | 4609 | 0.248 | 0.289 | 0.860 | 0.3856 | False | [-0.33, 0.80] | -0.001 | 9 | 0.0450 | 0.000344 | False |
+| H1 | 3 | 4609 | 0.477 | 0.455 | 1.050 | 0.2930 | False | [-0.43, 1.36] | 0.015 | 5 | 0.0250 | 0.000322 | False |
+| H1 | 6 | 4609 | 1.543 | 0.596 | 2.588 | 0.0100 | False | [0.37, 2.71] | 0.010 | 1 | 0.0050 | 0.000070 | False |
+| H1 | 12 | 4608 | 2.121 | 0.825 | 2.571 | 0.0109 | False | [0.49, 3.73] | -0.009 | 2 | 0.0100 | 0.000073 | False |
+| H1 | 48 | 4608 | 2.327 | 1.424 | 1.634 | 0.1038 | False | [-0.48, 5.10] | -0.004 | 3 | 0.0150 | 0.000216 | False |
+| H2 | 1 | 783 | -0.484 | 1.084 | -0.446 | 0.6571 | False | [-2.62, 1.63] | 0.057 | 17 | 0.0850 | 0.000336 | False |
+| H2 | 3 | 783 | 1.074 | 1.444 | 0.743 | 0.4524 | False | [-1.79, 3.87] | 0.026 | 12 | 0.0600 | 0.000352 | False |
+| H2 | 6 | 783 | 1.450 | 1.975 | 0.734 | 0.4595 | False | [-2.47, 5.28] | 0.045 | 13 | 0.0650 | 0.000352 | False |
+| H2 | 12 | 783 | 0.880 | 2.731 | 0.322 | 0.7454 | False | [-4.48, 6.22] | 0.067 | 19 | 0.0950 | 0.000308 | False |
+| H2 | 48 | 783 | -3.683 | 4.605 | -0.800 | 0.4257 | False | [-12.80, 5.25] | 0.016 | 11 | 0.0550 | 0.000350 | False |
+| H3 | 1 | 62 | 2.654 | 2.761 | 0.961 | 0.3394 | False | [-2.94, 7.88] | -0.177 | 7 | 0.0350 | 0.000335 | False |
+| H3 | 3 | 62 | -2.479 | 4.314 | -0.575 | 0.5612 | False | [-11.01, 5.90] | 0.053 | 16 | 0.0800 | 0.000351 | False |
+| H3 | 6 | 62 | 1.410 | 6.847 | 0.206 | 0.8379 | False | [-12.03, 14.81] | -0.016 | 20 | 0.1000 | 0.000261 | False |
+| H3 | 12 | 62 | -7.666 | 9.503 | -0.807 | 0.4136 | False | [-26.45, 10.80] | 0.037 | 10 | 0.0500 | 0.000348 | False |
+| H3 | 48 | 62 | 16.003 | 16.975 | 0.943 | 0.3437 | False | [-16.72, 49.83] | 0.011 | 8 | 0.0400 | 0.000336 | False |
+| H6 | 1 | 286 | 0.649 | 1.997 | 0.325 | 0.7169 | False | [-3.45, 4.38] | -0.000 | 18 | 0.0900 | 0.000319 | False |
+| H6 | 3 | 286 | -2.456 | 3.464 | -0.709 | 0.4800 | False | [-9.30, 4.28] | -0.025 | 14 | 0.0700 | 0.000353 | False |
+| H6 | 6 | 286 | -5.405 | 4.249 | -1.272 | 0.1980 | False | [-14.03, 2.62] | -0.014 | 4 | 0.0200 | 0.000282 | False |
+| H6 | 12 | 286 | -6.554 | 6.514 | -1.006 | 0.3121 | False | [-20.19, 5.35] | -0.014 | 6 | 0.0300 | 0.000328 | False |
+| H6 | 48 | 286 | -6.175 | 9.271 | -0.666 | 0.5128 | False | [-24.93, 11.41] | 0.025 | 15 | 0.0750 | 0.000353 | False |
+
+**Precision self-containment check (post-hoc robustness diagnostic - not a pre-registered rule; added this round alongside the precision amendment):** for each cell, MC-SE of p-hat = sqrt(p-hat*(1-p-hat)/2,000,000), and the operative BH step-up threshold at that cell's rank (ascending by p, 1-indexed) is (rank/20)*0.1. A cell 'straddles' if its p-hat +/- 3xMC-SE interval contains its own operative threshold - i.e. finite-K Monte Carlo noise in p-hat could plausibly have flipped its significant/not-significant call. **No cell straddles its operative threshold at 2,000,000 reps.** Binding case (closest miss, rank 2): H1 h=12, p-hat=0.0109 +/- 0.0002 vs operative threshold 0.0100 - interval excludes the threshold, so the near-miss is not a precision artifact.
 
 ## Seed invariance (precision amendment)
 
@@ -83,6 +85,8 @@ Additive supplement per preregistration/DEVIATIONS.md entry 2 - does **not** par
 | H6 | 6 | -5.405 | 0.0168 | 0.9662 |
 | H6 | 12 | -6.554 | 0.0371 | 0.9662 |
 | H6 | 48 | -6.175 | 0.3187 | 0.9662 |
+
+**Why the bootstrap and placebo disagree on H6 (mechanism, not a contradiction to resolve):** the two methods answer different questions. H6 conditions on P95 volume, so its events select high-dispersion states. The day-cluster bootstrap resamples the actual event days and inherits that dispersion; the circular-shift placebo relocates the event pattern to typical (unconditioned) states, producing a tighter null. The placebo therefore absorbs drift but does not preserve volatility-state conditioning - making it anti-conservative for state-conditioned signals like H6, which is precisely why the pre-registered gates run on the bootstrap and not on the placebo. **H6's sign is explicitly negative** (h=6: -5.405bp, h=12: -6.554bp) - the placebo is flagging possible *contrarian* alignment (fading the exhaustion signal), not support for H6 as originally hypothesized. No multiplicity procedure is applied to the placebo column: it is a non-gating diagnostic, and at K=10,000 its smallest p-values (e.g. H1 h=6's 0.0047, exactly 47/10,000) carry Monte Carlo granularity of the same kind just eliminated from the primary family by the precision amendment above - any threshold claim on the placebo column would be unstable by construction. Under either inference method the study's conclusion is unchanged where it matters: every cell sits far below the 18.0bp materiality bar, E(signal) = empty set for all four signals, and zero promotions occur.
 
 ## Promotion gates
 

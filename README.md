@@ -61,6 +61,23 @@ across configs. See `reports/sensitivity_grid.md` for the full tables
 and the mandatory interpretation preamble governing how (and how not) to
 read them.
 
+A **circular-shift placebo** (non-gating, K=10,000 shifts per signal -
+see the Rigor coverage matrix below) mostly agrees with the day-cluster
+bootstrap, but diverges on H6: the bootstrap resamples H6's actual event
+days and so inherits the high-dispersion state H6 conditions on (P95
+volume), while the placebo relocates the same event pattern to typical
+states, producing a tighter null. The placebo is therefore
+anti-conservative for a state-conditioned signal like H6 - exactly why
+the pre-registered gates run on the bootstrap, not the placebo. **H6's
+placebo-flagged sign is negative** (h=6: -5.4bp, h=12: -6.6bp): read as
+possible *contrarian* alignment (fading the exhaustion signal), not
+support for H6 as originally hypothesized. No multiplicity correction is
+applied to the placebo column - it is a diagnostic, and at K=10,000 its
+smallest values carry the same kind of Monte Carlo granularity the
+precision amendment above exists to eliminate from the primary family.
+Full mechanism discussion and the disagreement table in
+`reports/event_study_btc.md`.
+
 Full numeric detail: [`reports/FINAL_REPORT.md`](reports/FINAL_REPORT.md)
 (assembled from the runner-generated artifacts of every phase - nothing
 in it is hand-typed).

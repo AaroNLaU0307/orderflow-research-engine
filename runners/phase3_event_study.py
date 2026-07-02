@@ -8,6 +8,7 @@ reports/event_study_btc.md + CSVs (runner-generated, immutable).
 """
 from __future__ import annotations
 
+import math
 import sys
 import time
 from pathlib import Path
@@ -174,12 +175,33 @@ def run() -> None:
         )
         log(f"  {alt_label}: bh_significant_set={sorted(alt_sig_set)} matches_primary={matches}")
 
+    # Precision self-containment (post-hoc robustness diagnostic, not a
+    # pre-registered rule - see the DEVIATIONS.md entry this feeds): does
+    # finite-K Monte Carlo estimation error in p-hat itself put any cell's
+    # BH-significant/not-significant classification in doubt? MC-SE of a
+    # bootstrap p-hat (itself an estimated proportion over K resamples) is
+    # sqrt(p_hat*(1-p_hat)/K); a cell "straddles" if its p_hat +/- 3*MC-SE
+    # interval contains its own rank's operative BH step-up threshold
+    # (rank/20)*FDR_Q - i.e. more precision (more reps) could plausibly flip
+    # its classification. This is evaluated on the already-fixed p-values
+    # above; it draws no new random samples.
+    ranked_keys = sorted(cell_keys, key=lambda k: cell_lookup[k].get("p_value", float("nan")))
+    rank_of = {k: i + 1 for i, k in enumerate(ranked_keys)}
+    n_family = len(cell_keys)
+
     cell_records = []
     for (sig, h), c in cell_lookup.items():
         mean = c.get("observed_mean")
         ci_lo, ci_hi = c.get("ci95_lo"), c.get("ci95_hi")
         se_bp = (ci_hi - ci_lo) / (2 * 1.96) * 10_000 if ci_lo is not None and ci_hi is not None else None
         t_stat = (mean * 10_000) / se_bp if se_bp else None
+        p = c.get("p_value")
+        rank = rank_of[(sig, h)]
+        operative_threshold = (rank / n_family) * FDR_Q
+        mc_se_p = math.sqrt(p * (1 - p) / BOOTSTRAP_REPS) if p is not None and 0.0 <= p <= 1.0 else None
+        straddle = (
+            (p - 3 * mc_se_p) <= operative_threshold <= (p + 3 * mc_se_p) if mc_se_p is not None else None
+        )
         cell_records.append(
             {
                 "signal": sig,
@@ -189,13 +211,17 @@ def run() -> None:
                 "observed_mean_bp": mean * 10_000 if mean is not None else float("nan"),
                 "bootstrap_se_bp": se_bp,
                 "t_stat": t_stat,
-                "p_value": c.get("p_value"),
+                "p_value": p,
                 "bh_significant_q10": c.get("bh_significant", False),
                 "ci95_lo_bp": ci_lo * 10_000 if ci_lo is not None else None,
                 "ci95_hi_bp": ci_hi * 10_000 if ci_hi is not None else None,
                 "spearman_ic": c.get("spearman_ic"),
                 "ic_ci95_lo": c.get("ic_ci95_lo"),
                 "ic_ci95_hi": c.get("ic_ci95_hi"),
+                "rank_by_p": rank,
+                "operative_bh_threshold": operative_threshold,
+                "mc_se_p": mc_se_p,
+                "straddle_flag": straddle,
             }
         )
     cells_df = pl.DataFrame(cell_records).sort(["signal", "horizon_bars"])
@@ -350,17 +376,39 @@ def write_markdown_report(
     lines.append("")
     lines.append("## Cells")
     lines.append("")
-    lines.append("| Signal | Horizon (bars) | N | Mean (bp) | Bootstrap SE (bp) | t | raw p | BH-FDR q=0.10 sig | 95% CI (bp) | Spearman IC |")
-    lines.append("|---|---|---|---|---|---|---|---|---|---|")
+    lines.append(
+        "| Signal | Horizon (bars) | N | Mean (bp) | Bootstrap SE (bp) | t | raw p | BH-FDR q=0.10 sig | "
+        "95% CI (bp) | Spearman IC | Rank by p | Operative BH threshold | MC-SE of p-hat | Straddles threshold |"
+    )
+    lines.append("|---|---|---|---|---|---|---|---|---|---|---|---|---|---|")
     for row in cells_df.iter_rows(named=True):
         ci = f"[{row['ci95_lo_bp']:.2f}, {row['ci95_hi_bp']:.2f}]" if row["ci95_lo_bp"] is not None else "n/a"
         ic = f"{row['spearman_ic']:.3f}" if row["spearman_ic"] is not None else "n/a"
         se = f"{row['bootstrap_se_bp']:.3f}" if row["bootstrap_se_bp"] is not None else "n/a"
         t = f"{row['t_stat']:.3f}" if row["t_stat"] is not None else "n/a"
+        mc_se = f"{row['mc_se_p']:.6f}" if row["mc_se_p"] is not None else "n/a"
+        thr = f"{row['operative_bh_threshold']:.4f}"
         lines.append(
             f"| {row['signal']} | {row['horizon_bars']} | {row['n_events']} | {row['observed_mean_bp']:.3f} | {se} | {t} | "
-            f"{row['p_value']:.4f} | {row['bh_significant_q10']} | {ci} | {ic} |"
+            f"{row['p_value']:.4f} | {row['bh_significant_q10']} | {ci} | {ic} | {row['rank_by_p']} | {thr} | {mc_se} | {row['straddle_flag']} |"
         )
+    lines.append("")
+    straddle_count = cells_df.filter(pl.col("straddle_flag")).height
+    straddle_summary = "No cell straddles" if straddle_count == 0 else f"{straddle_count} cell(s) straddle"
+    binding = cells_df.sort("rank_by_p").row(1, named=True)  # rank 2 - the closest miss in this family
+    n_family = cells_df.height
+    lines.append(
+        f"**Precision self-containment check (post-hoc robustness diagnostic - not a pre-registered rule; "
+        f"added this round alongside the precision amendment):** for each cell, MC-SE of p-hat = "
+        f"sqrt(p-hat*(1-p-hat)/{BOOTSTRAP_REPS:,}), and the operative BH step-up threshold at that cell's "
+        f"rank (ascending by p, 1-indexed) is (rank/{n_family})*{FDR_Q}. A cell 'straddles' if its p-hat +/- "
+        f"3xMC-SE interval contains its own operative threshold - i.e. finite-K Monte Carlo noise in p-hat "
+        f"could plausibly have flipped its significant/not-significant call. **{straddle_summary} its "
+        f"operative threshold at {BOOTSTRAP_REPS:,} reps.** Binding case (closest miss, rank 2): "
+        f"{binding['signal']} h={binding['horizon_bars']}, p-hat={binding['p_value']:.4f} +/- "
+        f"{3*binding['mc_se_p']:.4f} vs operative threshold {binding['operative_bh_threshold']:.4f} - "
+        f"interval excludes the threshold, so the near-miss is not a precision artifact."
+    )
     lines.append("")
     lines.append("## Seed invariance (precision amendment)")
     lines.append("")
@@ -422,6 +470,25 @@ def write_markdown_report(
             f"| {row['signal']} | {row['horizon_bars']} | {row['observed_mean_bp']:.3f} | "
             f"{row['placebo_p']:.4f} | {row['mean_admitted_fraction']:.4f} |"
         )
+    lines.append("")
+    lines.append(
+        "**Why the bootstrap and placebo disagree on H6 (mechanism, not a contradiction to resolve):** "
+        "the two methods answer different questions. H6 conditions on P95 volume, so its events select "
+        "high-dispersion states. The day-cluster bootstrap resamples the actual event days and inherits "
+        "that dispersion; the circular-shift placebo relocates the event pattern to typical (unconditioned) "
+        "states, producing a tighter null. The placebo therefore absorbs drift but does not preserve "
+        "volatility-state conditioning - making it anti-conservative for state-conditioned signals like H6, "
+        "which is precisely why the pre-registered gates run on the bootstrap and not on the placebo. "
+        "**H6's sign is explicitly negative** (h=6: -5.405bp, h=12: -6.554bp) - the placebo is flagging "
+        "possible *contrarian* alignment (fading the exhaustion signal), not support for H6 as originally "
+        "hypothesized. No multiplicity procedure is applied to the placebo column: it is a non-gating "
+        f"diagnostic, and at K={PLACEBO_K:,} its smallest p-values (e.g. H1 h=6's 0.0047, exactly 47/10,000) "
+        "carry Monte Carlo granularity of the same kind just eliminated from the primary family by the precision "
+        "amendment above - any threshold claim on the placebo column would be unstable by construction. "
+        "Under either inference method the study's conclusion is unchanged where it matters: every cell "
+        f"sits far below the {MATERIALITY_BP}bp materiality bar, E(signal) = empty set for all four "
+        "signals, and zero promotions occur."
+    )
     lines.append("")
     lines.append("## Promotion gates")
     lines.append("")

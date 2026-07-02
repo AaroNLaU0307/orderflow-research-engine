@@ -10,6 +10,20 @@ no full-depth L2 history, and third-party vendors' free tiers are too
 sparse (1st-of-month-only) for confirmatory inference. See
 `preregistration/PREREGISTRATION.md` section 3 and `README.md`.
 
+## v1.1 (candidate) - single-shot confirmatory test of two placebo-flagged patterns
+
+A single-shot, pre-registered confirmatory test of the two placebo-flagged,
+hypothesis-generating patterns from v1 - the H1 event-return alignment and
+the reversed-H6 (exhaustion-fade) direction - on the reserved, never-opened
+OOS segment (2025-01 to 2026-06). Spec frozen before the segment is
+opened; one attempt; both patterns remain economically immaterial at v1's
+observed magnitudes (~2bp and ~5-7bp gross vs. the 18bp bar), so the
+test's value is methodological (does the alignment replicate?) rather
+than a path to a tradable edge. Origin as a post-hoc diagnostic is
+disclosed by construction - see `preregistration/DEVIATIONS.md` entry 2
+and `reports/event_study_btc.md`'s circular-shift placebo section for
+where these two patterns came from.
+
 ## v1.5 - H4/H5 on self-recorded L2
 
 The blocker for H4/H5 was data availability, not signal design - both

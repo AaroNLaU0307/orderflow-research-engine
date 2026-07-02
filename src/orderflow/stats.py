@@ -8,8 +8,24 @@ dependence" (section 6.2).
 """
 from __future__ import annotations
 
+import zlib
+
 import numpy as np
 from scipy import stats as scipy_stats
+
+
+def stable_seed(*parts: object) -> int:
+    """Deterministic RNG seed from arbitrary parts (e.g. signal name,
+    horizon, config label) - stable across Python processes and runs.
+
+    Python's built-in hash() is randomized per-process by default (PEP 456
+    hash randomization, PYTHONHASHSEED) for str/bytes/tuples-of-those; using
+    it for a bootstrap seed makes every reported p-value/CI silently
+    non-reproducible run to run. zlib.crc32 over a fixed string encoding has
+    no such randomization.
+    """
+    key = "|".join(str(p) for p in parts).encode("utf-8")
+    return zlib.crc32(key) % (2**31)
 
 
 def day_cluster_bootstrap_mean(

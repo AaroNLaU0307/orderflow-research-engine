@@ -8,7 +8,7 @@ The reconciliation check's purpose is to validate aggTrades, the only dataset co
 
 ## Manifest completeness
 
-- Manifest entries: 1652
+- Manifest entries: 1661
 - Expected monthly files (symbols x datasets x months): 288
 - Missing or unrecorded: 0
 - Checksum failures: 0
@@ -63,24 +63,24 @@ The reconciliation check's purpose is to validate aggTrades, the only dataset co
 ## Monthly-archive-gap backfill (daily-archive splice)
 
 - Months repaired via daily-archive backfill: 11
-  - BTCUSDT 2022-08: missing_days=[28, 29, 30] -> recovered from daily archive
-  - BTCUSDT 2022-09: missing_days=[1, 10] -> recovered from daily archive
-  - BTCUSDT 2022-10: missing_days=[29] -> recovered from daily archive
-  - BTCUSDT 2022-11: missing_days=[7, 14] -> recovered from daily archive
-  - BTCUSDT 2023-05: missing_days=[9] -> recovered from daily archive
-  - ETHUSDT 2022-08: missing_days=[28, 29, 30] -> recovered from daily archive
-  - ETHUSDT 2022-09: missing_days=[1] -> recovered from daily archive
-  - ETHUSDT 2022-10: missing_days=[29] -> recovered from daily archive
-  - ETHUSDT 2022-11: missing_days=[7, 14] -> recovered from daily archive
-  - ETHUSDT 2023-05: missing_days=[10] -> recovered from daily archive
-  - ETHUSDT 2023-05: missing_days=[1, 2, 3, 4, 5, 7, 8, 9, 11, 13] -> recovered from daily archive
+  - BTCUSDT 2022-08: missing_days=[28, 29, 30] -> recovered from daily archive [AGG_PARTIAL_GAP (whole-day: absent from the monthly archive entirely)]
+  - BTCUSDT 2022-09: missing_days=[1, 10] -> recovered from daily archive [AGG_PARTIAL_GAP (whole-day: absent from the monthly archive entirely)]
+  - BTCUSDT 2022-10: missing_days=[29] -> recovered from daily archive [AGG_PARTIAL_GAP (whole-day: absent from the monthly archive entirely)]
+  - BTCUSDT 2022-11: missing_days=[7, 14] -> recovered from daily archive [AGG_PARTIAL_GAP (whole-day: absent from the monthly archive entirely)]
+  - BTCUSDT 2023-05: missing_days=[9] -> recovered from daily archive [AGG_PARTIAL_GAP (whole-day: absent from the monthly archive entirely)]
+  - ETHUSDT 2022-08: missing_days=[28, 29, 30] -> recovered from daily archive [AGG_PARTIAL_GAP (whole-day: absent from the monthly archive entirely)]
+  - ETHUSDT 2022-09: missing_days=[1] -> recovered from daily archive [AGG_PARTIAL_GAP (whole-day: absent from the monthly archive entirely)]
+  - ETHUSDT 2022-10: missing_days=[29] -> recovered from daily archive [AGG_PARTIAL_GAP (whole-day: absent from the monthly archive entirely)]
+  - ETHUSDT 2022-11: missing_days=[7, 14] -> recovered from daily archive [AGG_PARTIAL_GAP (whole-day: absent from the monthly archive entirely)]
+  - ETHUSDT 2023-05: missing_days=[10] -> recovered from daily archive [AGG_PARTIAL_GAP (whole-day: absent from the monthly archive entirely)]
+  - ETHUSDT 2023-05: missing_days=[1, 2, 3, 4, 5, 7, 8, 9, 11, 13] -> recovered from daily archive [AGG_STALE_REVISION splice (agg_trade_id contiguous; same-ID different-quantity value revision between monthly and daily archive generations, not missing trades)]
 - Months where daily archive ALSO lacked the data (unrecoverable): 0
 
 Provenance: data/manifest.json records the sha256 of every individual file ingested, including both the monthly zip and any daily backfill zips for a repaired month (so a repaired month has both its monthly-zip manifest entry AND separate entries for each spliced daily zip). data/qa_backfill_log.jsonl is the authoritative per-month record of which months were repaired and from which specific days.
 
-## Breach-day classification (KLINES_HOLE / AGG_PARTIAL_GAP / AGG_PARTIAL_GAP_UPSTREAM / UNEXPLAINED)
+## Breach-day classification (KLINES_HOLE / AGG_PARTIAL_GAP / AGG_STALE_REVISION / AGG_PARTIAL_GAP_UPSTREAM / UNEXPLAINED)
 
-Every reconciliation breach day is classified against the daily-archive ground truth. KLINES_HOLE: aggTrades independently verified complete (matches its own daily archive exactly, contiguous agg_trade_id sequence) and the diff is magnitude-weighted-explained by zero-volume klines minutes - exonerates aggTrades, the only dataset confirmatory statistics touch. AGG_PARTIAL_GAP: the monthly aggTrades rollup was short vs. the daily archive for that day - repaired by splicing in the daily archive's data (see backfill section above). AGG_PARTIAL_GAP_UPSTREAM: the daily archive has the same hole as the monthly one (not repairable by re-splicing) - handled via data/quarantine_windows.json (bars overlapping the window are excluded from event formation; forward returns spanning it are nulled).
+Every CURRENTLY OUTSTANDING reconciliation breach day is classified against the daily-archive ground truth (table below). KLINES_HOLE: aggTrades independently verified complete (matches its own daily archive exactly, contiguous agg_trade_id sequence) and the diff is magnitude-weighted-explained by zero-volume klines minutes - exonerates aggTrades, the only dataset confirmatory statistics touch. AGG_PARTIAL_GAP: the monthly aggTrades rollup is missing trades for that day (agg_trade_id discontinuity) vs. the daily archive - repaired by splicing in the daily archive's data. AGG_STALE_REVISION: a related but mechanistically distinct case - the monthly and daily archives share the exact same agg_trade_id sequence for the day (no gap) but disagree on quantity values for those same IDs, an apparent Binance revision between when the two archives were generated - repaired the same way (replace with the daily archive's values) but the root cause is a value correction, not missing data. AGG_PARTIAL_GAP_UPSTREAM: the daily archive has the same hole as the monthly one (not repairable by re-splicing) - handled via data/quarantine_windows.json (bars overlapping the window are excluded from event formation; forward returns spanning it are nulled). Already-repaired days no longer breach and so do not appear in the table below; see the backfill section above for the full historical record, including the ETHUSDT 2023-05 AGG_STALE_REVISION case (10 days) explicitly labeled there.
 
 | Symbol | Date | Direction | Diff% | Zero-vol klines min | Daily archive max ID jump | Daily archive max ts gap (min) | Verdict |
 |---|---|---|---|---|---|---|---|
@@ -90,21 +90,11 @@ Every reconciliation breach day is classified against the daily-archive ground t
 | BTCUSDT | 2025-01-14 | agg>k | 1.6170 | 2 | 1 | 0.09 | KLINES_HOLE |
 | BTCUSDT | 2025-01-29 | agg>k | 0.6628 | 17 | 1 | 0.09 | KLINES_HOLE |
 | ETHUSDT | 2022-09-06 | agg<k | -4.5110 | 0 | 94136 | 11.39 | AGG_PARTIAL_GAP_UPSTREAM |
-| ETHUSDT | 2023-05-01 | agg<k | -0.6454 | 0 | 1 | 0.08 | AGG_PARTIAL_GAP |
-| ETHUSDT | 2023-05-02 | agg<k | -0.6616 | 0 | 1 | 0.08 | AGG_PARTIAL_GAP |
-| ETHUSDT | 2023-05-03 | agg<k | -0.6424 | 0 | 1 | 0.09 | AGG_PARTIAL_GAP |
-| ETHUSDT | 2023-05-04 | agg<k | -0.7836 | 0 | 1 | 0.09 | AGG_PARTIAL_GAP |
-| ETHUSDT | 2023-05-05 | agg<k | -0.5162 | 0 | 1 | 0.11 | AGG_PARTIAL_GAP |
-| ETHUSDT | 2023-05-07 | agg<k | -0.7615 | 0 | 1 | 0.1 | AGG_PARTIAL_GAP |
-| ETHUSDT | 2023-05-08 | agg<k | -0.5550 | 0 | 1 | 0.06 | AGG_PARTIAL_GAP |
-| ETHUSDT | 2023-05-09 | agg<k | -0.7231 | 0 | 1 | 0.1 | AGG_PARTIAL_GAP |
-| ETHUSDT | 2023-05-11 | agg<k | -0.5871 | 0 | 1 | 0.1 | AGG_PARTIAL_GAP |
-| ETHUSDT | 2023-05-13 | agg<k | -0.7290 | 0 | 1 | 0.11 | AGG_PARTIAL_GAP |
 | ETHUSDT | 2024-10-28 | agg>k | 2.5829 | 89 | 1 | 14.51 | KLINES_HOLE |
 | ETHUSDT | 2025-01-14 | agg>k | 1.5940 | 3 | 1 | 0.08 | KLINES_HOLE |
 | ETHUSDT | 2025-01-29 | agg>k | 0.6259 | 17 | 1 | 0.09 | KLINES_HOLE |
 
-- Totals: KLINES_HOLE=7 (no action, aggTrades exonerated), AGG_PARTIAL_GAP=10 (repaired by splice, see above), AGG_PARTIAL_GAP_UPSTREAM=2 (quarantined, see data/quarantine_windows.json), UNEXPLAINED=0
+- Totals among currently-outstanding breach days: KLINES_HOLE=7 (no action, aggTrades exonerated), AGG_PARTIAL_GAP=0, AGG_STALE_REVISION=0 (both repaired by splice, see backfill section), AGG_PARTIAL_GAP_UPSTREAM=2 (quarantined, see data/quarantine_windows.json), UNEXPLAINED=0. Historical (already repaired, no longer breach): 5 whole-day AGG_PARTIAL_GAP months (BTC) + 5 whole-day AGG_PARTIAL_GAP months (ETH) + 1 ten-day AGG_STALE_REVISION month (ETH 2023-05) - see backfill section above for the complete list.
 
 ## Bar-store sanity counts
 
@@ -134,9 +124,9 @@ Every reconciliation breach day is classified against the daily-archive ground t
 
 ## Raw zip/csv retention status
 
-- Total remaining under data/raw/: 716.3 MB
-  - .csv: 170 files, 573.4 MB
-  - .zip: 170 files, 142.7 MB
+- Total remaining under data/raw/: 408.3 MB
+  - .csv: 168 files, 318.4 MB
+  - .zip: 168 files, 89.7 MB
   - .CHECKSUM: 1666 files, 0.2 MB
 
 Raw aggTrades/klines/fundingRate .zip and extracted .csv files are deleted immediately after each month is staged to parquet (per docs/BRIEF.md section 2.4); only their tiny .CHECKSUM sidecar files remain (a few hundred bytes each). bookDepth raw files remain because 157 daily bookDepth files failed to parse (see note below) and the exception occurs before the cleanup step - this is descriptive-context data only (never a signal input) and does not affect Phase 3. Separately, all 48 months of BTCUSDT monthly aggTrades zips have been re-downloaded and retained under data/raw_retained/BTCUSDT/aggTrades/ (download-only, not parsed) so the Delta=10 and 3-minute-bar sensitivity configs (preregistration section 8) do not require a second download later - Delta=50 and 15m-bar configs are still derivable from the existing 5m/Delta=25 parquet store by aggregation. Staging/computation of the sensitivity grid itself remains deferred until after main results review, per instruction.

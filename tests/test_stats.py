@@ -1,7 +1,36 @@
+import subprocess
+import sys
+
 import numpy as np
 import pytest
 
 from orderflow import stats
+
+
+def test_stable_seed_deterministic_within_process():
+    assert stats.stable_seed("H1", 6) == stats.stable_seed("H1", 6)
+    assert stats.stable_seed("H1", 6) != stats.stable_seed("H1", 12)
+    assert stats.stable_seed("H1", 6) != stats.stable_seed("H2", 6)
+
+
+def test_stable_seed_deterministic_across_processes():
+    """Regression test: hash() on a tuple is randomized per-process by
+    default (PYTHONHASHSEED), which silently made bootstrap p-values
+    non-reproducible run to run. Verify stable_seed is NOT affected by
+    disabling hash randomization in one subprocess and comparing."""
+    code = "from orderflow import stats; print(stats.stable_seed('H1', 6))"
+    results = set()
+    for hashseed in ["0", "1", "12345"]:
+        out = subprocess.run(
+            [sys.executable, "-c", code],
+            cwd=__file__.rsplit("tests", 1)[0] + "src",
+            env={"PYTHONHASHSEED": hashseed, "PATH": __import__("os").environ.get("PATH", "")},
+            capture_output=True,
+            text=True,
+        )
+        assert out.returncode == 0, out.stderr
+        results.add(out.stdout.strip())
+    assert len(results) == 1, f"stable_seed varied across PYTHONHASHSEED values: {results}"
 
 
 def test_day_cluster_bootstrap_clear_positive_mean_is_significant():

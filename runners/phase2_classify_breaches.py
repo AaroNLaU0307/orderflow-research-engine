@@ -177,11 +177,29 @@ def classify_day(symbol: str, row: dict, manifest: etl.Manifest) -> dict:
     else:  # agg<k
         has_gap_evidence = stats["max_id_jump"] > 2 or stats["max_ts_gap_minutes"] >= 30
         daily_has_more = daily_vs_current_pct > 0.1
-        if daily_has_more:
+        if daily_has_more and not has_gap_evidence:
+            # daily archive's agg_trade_id sequence is contiguous (max_id_jump<=2)
+            # for THIS DAY - i.e. no trades are structurally missing from the
+            # monthly file's ID sequence. The volume shortfall is therefore a
+            # same-ID-different-quantity value revision between when the two
+            # archives were generated (see etl.backfill_missing_days docstring
+            # and the ETHUSDT 2023-05-04 case that first surfaced this), not a
+            # gap where entire trades are absent. Mechanically still repaired
+            # by the same daily-archive splice, but the root cause and label
+            # are distinct from a genuine partial-day gap.
+            record["verdict"] = "AGG_STALE_REVISION"
+            record["reason"] = (
+                f"daily archive has {daily_vs_current_pct:.3f}% more volume than currently staged, "
+                f"but its agg_trade_id sequence for this day is contiguous (max_id_jump={stats['max_id_jump']}) "
+                f"-> not a gap, a same-ID different-quantity revision between archive generations; "
+                f"repaired by replacing this day's monthly-sourced trades with the daily archive's values"
+            )
+        elif daily_has_more:
             record["verdict"] = "AGG_PARTIAL_GAP"
             record["reason"] = (
-                f"daily archive has {daily_vs_current_pct:.3f}% more volume than currently staged "
-                f"-> monthly-archive rollup is short for this day; repairable by splice"
+                f"daily archive has {daily_vs_current_pct:.3f}% more volume than currently staged, "
+                f"with agg_trade_id evidence of a genuine gap (max_id_jump={stats['max_id_jump']}) "
+                f"-> monthly-archive rollup is missing trades for this day; repairable by splice"
             )
         elif has_gap_evidence:
             record["verdict"] = "AGG_PARTIAL_GAP_UPSTREAM"

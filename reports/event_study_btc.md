@@ -9,6 +9,8 @@ Cost model: round trip ~= 12.0bp; materiality gate requires mean gross return >=
 
 - Raw detected: 11,820 -> after quarantine filter: 11,820 -> after warm-up (bar_index>=8640): 11,810 -> after dedup (6-bar, keep-first): 11,161
 
+**Warm-up clarification:** exactly 10 events were removed at the warm-up stage (bar_index < 8640), broken down as H1=0, H2=3, H3=1, H6=6. This small number is fully explained by two independent, verified mechanisms rather than a partially-applied warm-up: (1) H1's own trailing 8640-bar sigma window (the statistic that sets the warm-up constant in the first place) already makes its earliest possible event bar_index ~8693 - past the warm-up boundary before the filter does anything, so H1 contributes 0. (2) H6's own trailing 2016-bar P95 window makes bars 2016-8639 the only pre-warm-up region where it can fire at all (a 6624-bar span, not the ~30-day full pre-warm-up window); its 6 removed events fall there. (3) H2 and H3 use a pooled-percentile rolling reference (orderflow.rolling.rolling_pooled_percentile for med96/p25_96) that does not enforce a hard minimum-sample count the way polars' native rolling_* functions do (min_periods=window_size) - so they are mechanically eligible to fire from very early bars, not just after ~96 bars of history. Despite that wider eligibility window, only 3 (H2) and 1 (H3) events actually satisfy the full compound trigger condition before bar_index 8640, at bar_index 2754+ and 6421 respectively - both already well past 96, so their own reference windows were fully populated regardless. This is empirical rarity of the compound pattern in that stretch of the sample, not a partially-populated statistic; verified by confirming zero events with bar_index<8640 survive into the post-warm-up, post-dedup event set actually used below.
+
 | Signal | Raw | Final (post warm-up+dedup) | Bull | Bear |
 |---|---|---|---|---|
 | H1 | 8,005 | 7,785 | 3,894 | 3,891 |
@@ -22,26 +24,26 @@ Cost model: round trip ~= 12.0bp; materiality gate requires mean gross return >=
 
 | Signal | Horizon (bars) | N | Mean (bp) | Bootstrap SE (bp) | t | raw p | BH-FDR q=0.10 sig | 95% CI (bp) | Spearman IC |
 |---|---|---|---|---|---|---|---|---|---|
-| H1 | 1 | 4609 | 0.248 | 0.289 | 0.860 | 0.3718 | False | [-0.33, 0.80] | -0.001 |
-| H1 | 3 | 4609 | 0.477 | 0.456 | 1.047 | 0.2944 | False | [-0.43, 1.36] | 0.015 |
-| H1 | 6 | 4609 | 1.543 | 0.597 | 2.584 | 0.0112 | False | [0.37, 2.71] | 0.010 |
-| H1 | 12 | 4608 | 2.121 | 0.822 | 2.581 | 0.0098 | False | [0.50, 3.72] | -0.009 |
-| H1 | 48 | 4608 | 2.327 | 1.435 | 1.622 | 0.1092 | False | [-0.56, 5.06] | -0.004 |
-| H2 | 1 | 783 | -0.484 | 1.069 | -0.452 | 0.6486 | False | [-2.63, 1.56] | 0.057 |
-| H2 | 3 | 783 | 1.074 | 1.469 | 0.731 | 0.4718 | False | [-1.82, 3.93] | 0.026 |
-| H2 | 6 | 783 | 1.450 | 1.947 | 0.745 | 0.4496 | False | [-2.32, 5.32] | 0.045 |
-| H2 | 12 | 783 | 0.880 | 2.710 | 0.325 | 0.7546 | False | [-4.52, 6.11] | 0.067 |
-| H2 | 48 | 783 | -3.683 | 4.538 | -0.812 | 0.4224 | False | [-12.72, 5.07] | 0.016 |
-| H3 | 1 | 62 | 2.654 | 2.830 | 0.938 | 0.3368 | False | [-3.14, 7.96] | -0.177 |
-| H3 | 3 | 62 | -2.479 | 4.306 | -0.576 | 0.5636 | False | [-10.97, 5.90] | 0.053 |
-| H3 | 6 | 62 | 1.410 | 6.842 | 0.206 | 0.8418 | False | [-11.89, 14.93] | -0.016 |
-| H3 | 12 | 62 | -7.666 | 9.507 | -0.806 | 0.4242 | False | [-26.18, 11.08] | 0.037 |
-| H3 | 48 | 62 | 16.003 | 16.956 | 0.944 | 0.3550 | False | [-17.31, 49.15] | 0.011 |
-| H6 | 1 | 286 | 0.649 | 2.002 | 0.324 | 0.7260 | False | [-3.48, 4.37] | -0.000 |
-| H6 | 3 | 286 | -2.456 | 3.420 | -0.718 | 0.4862 | False | [-9.15, 4.25] | -0.025 |
-| H6 | 6 | 286 | -5.405 | 4.302 | -1.257 | 0.2014 | False | [-14.23, 2.64] | -0.014 |
-| H6 | 12 | 286 | -6.554 | 6.558 | -0.999 | 0.3200 | False | [-20.26, 5.44] | -0.014 |
-| H6 | 48 | 286 | -6.175 | 9.111 | -0.678 | 0.5010 | False | [-24.53, 11.19] | 0.025 |
+| H1 | 1 | 4609 | 0.248 | 0.288 | 0.863 | 0.3704 | False | [-0.32, 0.81] | -0.001 |
+| H1 | 3 | 4609 | 0.477 | 0.456 | 1.047 | 0.2872 | False | [-0.43, 1.35] | 0.015 |
+| H1 | 6 | 4609 | 1.543 | 0.602 | 2.564 | 0.0106 | False | [0.37, 2.73] | 0.010 |
+| H1 | 12 | 4608 | 2.121 | 0.829 | 2.558 | 0.0124 | False | [0.51, 3.76] | -0.009 |
+| H1 | 48 | 4608 | 2.327 | 1.442 | 1.614 | 0.1096 | False | [-0.53, 5.13] | -0.004 |
+| H2 | 1 | 783 | -0.484 | 1.111 | -0.435 | 0.6664 | False | [-2.64, 1.71] | 0.057 |
+| H2 | 3 | 783 | 1.074 | 1.454 | 0.738 | 0.4520 | False | [-1.78, 3.92] | 0.026 |
+| H2 | 6 | 783 | 1.450 | 1.991 | 0.728 | 0.4664 | False | [-2.48, 5.32] | 0.045 |
+| H2 | 12 | 783 | 0.880 | 2.763 | 0.318 | 0.7388 | False | [-4.54, 6.29] | 0.067 |
+| H2 | 48 | 783 | -3.683 | 4.635 | -0.795 | 0.4194 | False | [-12.74, 5.43] | 0.016 |
+| H3 | 1 | 62 | 2.654 | 2.711 | 0.979 | 0.3340 | False | [-2.92, 7.70] | -0.177 |
+| H3 | 3 | 62 | -2.479 | 4.317 | -0.574 | 0.5672 | False | [-10.85, 6.08] | 0.053 |
+| H3 | 6 | 62 | 1.410 | 6.824 | 0.207 | 0.8328 | False | [-11.96, 14.79] | -0.016 |
+| H3 | 12 | 62 | -7.666 | 9.651 | -0.794 | 0.4260 | False | [-26.49, 11.35] | 0.037 |
+| H3 | 48 | 62 | 16.003 | 17.158 | 0.933 | 0.3430 | False | [-16.94, 50.32] | 0.011 |
+| H6 | 1 | 286 | 0.649 | 2.006 | 0.324 | 0.7140 | False | [-3.44, 4.42] | -0.000 |
+| H6 | 3 | 286 | -2.456 | 3.490 | -0.704 | 0.4738 | False | [-9.42, 4.26] | -0.025 |
+| H6 | 6 | 286 | -5.405 | 4.224 | -1.280 | 0.2104 | False | [-13.81, 2.75] | -0.014 |
+| H6 | 12 | 286 | -6.554 | 6.485 | -1.011 | 0.3120 | False | [-20.10, 5.32] | -0.014 |
+| H6 | 48 | 286 | -6.175 | 9.203 | -0.671 | 0.5074 | False | [-24.88, 11.20] | 0.025 |
 
 ## Promotion gates
 

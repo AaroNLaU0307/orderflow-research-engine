@@ -132,7 +132,13 @@ def check_backfill_months() -> dict:
         return {"n_repaired": 0, "months": [], "unrecovered": []}
     records = [json.loads(line) for line in open(backfill_log_path, encoding="utf-8") if line.strip()]
     months = [
-        {"symbol": r["symbol"], "year": r["year"], "month": r["month"], "missing_days": r["original_missing_days"]}
+        {
+            "symbol": r["symbol"],
+            "year": r["year"],
+            "month": r["month"],
+            "missing_days": r["original_missing_days"],
+            "repair_type": r.get("repair_type", "AGG_PARTIAL_GAP (whole-day: absent from the monthly archive entirely)"),
+        }
         for r in records
     ]
     unrecovered = [m for r, m in zip(records, months) if r["still_missing"]]
@@ -273,7 +279,10 @@ def write_report(
     lines.append("")
     lines.append(f"- Months repaired via daily-archive backfill: {backfill_check['n_repaired']}")
     for m in backfill_check["months"]:
-        lines.append(f"  - {m['symbol']} {m['year']:04d}-{m['month']:02d}: missing_days={m['missing_days']} -> recovered from daily archive")
+        lines.append(
+            f"  - {m['symbol']} {m['year']:04d}-{m['month']:02d}: missing_days={m['missing_days']} "
+            f"-> recovered from daily archive [{m['repair_type']}]"
+        )
     lines.append(f"- Months where daily archive ALSO lacked the data (unrecoverable): {len(backfill_check['unrecovered'])}")
     for m in backfill_check["unrecovered"]:
         lines.append(f"  - {m['symbol']} {m['year']:04d}-{m['month']:02d}: missing_days={m['missing_days']}")
@@ -287,18 +296,25 @@ def write_report(
     )
     lines.append("")
 
-    lines.append("## Breach-day classification (KLINES_HOLE / AGG_PARTIAL_GAP / AGG_PARTIAL_GAP_UPSTREAM / UNEXPLAINED)")
+    lines.append("## Breach-day classification (KLINES_HOLE / AGG_PARTIAL_GAP / AGG_STALE_REVISION / AGG_PARTIAL_GAP_UPSTREAM / UNEXPLAINED)")
     lines.append("")
     lines.append(
-        "Every reconciliation breach day is classified against the daily-archive ground truth. "
-        "KLINES_HOLE: aggTrades independently verified complete (matches its own daily archive exactly, "
-        "contiguous agg_trade_id sequence) and the diff is magnitude-weighted-explained by zero-volume "
-        "klines minutes - exonerates aggTrades, the only dataset confirmatory statistics touch. "
-        "AGG_PARTIAL_GAP: the monthly aggTrades rollup was short vs. the daily archive for that day - "
-        "repaired by splicing in the daily archive's data (see backfill section above). "
-        "AGG_PARTIAL_GAP_UPSTREAM: the daily archive has the same hole as the monthly one (not repairable "
-        "by re-splicing) - handled via data/quarantine_windows.json (bars overlapping the window are "
-        "excluded from event formation; forward returns spanning it are nulled)."
+        "Every CURRENTLY OUTSTANDING reconciliation breach day is classified against the daily-archive "
+        "ground truth (table below). KLINES_HOLE: aggTrades independently verified complete (matches its "
+        "own daily archive exactly, contiguous agg_trade_id sequence) and the diff is "
+        "magnitude-weighted-explained by zero-volume klines minutes - exonerates aggTrades, the only "
+        "dataset confirmatory statistics touch. AGG_PARTIAL_GAP: the monthly aggTrades rollup is missing "
+        "trades for that day (agg_trade_id discontinuity) vs. the daily archive - repaired by splicing in "
+        "the daily archive's data. AGG_STALE_REVISION: a related but mechanistically distinct case - the "
+        "monthly and daily archives share the exact same agg_trade_id sequence for the day (no gap) but "
+        "disagree on quantity values for those same IDs, an apparent Binance revision between when the "
+        "two archives were generated - repaired the same way (replace with the daily archive's values) "
+        "but the root cause is a value correction, not missing data. AGG_PARTIAL_GAP_UPSTREAM: the daily "
+        "archive has the same hole as the monthly one (not repairable by re-splicing) - handled via "
+        "data/quarantine_windows.json (bars overlapping the window are excluded from event formation; "
+        "forward returns spanning it are nulled). Already-repaired days no longer breach and so do not "
+        "appear in the table below; see the backfill section above for the full historical record, "
+        "including the ETHUSDT 2023-05 AGG_STALE_REVISION case (10 days) explicitly labeled there."
     )
     lines.append("")
     lines.append("| Symbol | Date | Direction | Diff% | Zero-vol klines min | Daily archive max ID jump | Daily archive max ts gap (min) | Verdict |")
@@ -312,13 +328,17 @@ def write_report(
     lines.append("")
     n_klines_hole = sum(1 for r in class_check["records"] if r["verdict"] == "KLINES_HOLE")
     n_partial_gap = sum(1 for r in class_check["records"] if r["verdict"] == "AGG_PARTIAL_GAP")
+    n_stale_revision = sum(1 for r in class_check["records"] if r["verdict"] == "AGG_STALE_REVISION")
     n_upstream = sum(1 for r in class_check["records"] if r["verdict"] == "AGG_PARTIAL_GAP_UPSTREAM")
     n_unexplained = len(class_check["unexplained"])
     lines.append(
-        f"- Totals: KLINES_HOLE={n_klines_hole} (no action, aggTrades exonerated), "
-        f"AGG_PARTIAL_GAP={n_partial_gap} (repaired by splice, see above), "
-        f"AGG_PARTIAL_GAP_UPSTREAM={n_upstream} (quarantined, see data/quarantine_windows.json), "
-        f"UNEXPLAINED={n_unexplained}"
+        f"- Totals among currently-outstanding breach days: KLINES_HOLE={n_klines_hole} (no action, "
+        f"aggTrades exonerated), AGG_PARTIAL_GAP={n_partial_gap}, AGG_STALE_REVISION={n_stale_revision} "
+        f"(both repaired by splice, see backfill section), AGG_PARTIAL_GAP_UPSTREAM={n_upstream} "
+        f"(quarantined, see data/quarantine_windows.json), UNEXPLAINED={n_unexplained}. Historical "
+        f"(already repaired, no longer breach): 5 whole-day AGG_PARTIAL_GAP months (BTC) + 5 whole-day "
+        f"AGG_PARTIAL_GAP months (ETH) + 1 ten-day AGG_STALE_REVISION month (ETH 2023-05) - see backfill "
+        f"section above for the complete list."
     )
     if class_check["unexplained"]:
         lines.append("")

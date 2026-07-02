@@ -95,10 +95,70 @@
     "sha256": "af15d2bc7d2be8360537bb133890d0e3d5e9fc144a30fd4c2f9e0d0c112c2817",
     "status": "ok"
   },
+  "https://data.binance.vision/data/futures/um/daily/aggTrades/ETHUSDT/ETHUSDT-aggTrades-2023-05-01.zip": {
+    "byte_size": 14083899,
+    "ingested_at": "2026-07-02T14:23:31.756306+00:00",
+    "sha256": "aa94068b7388aea6a56fd6e22a9b39c4c5775840303838be814d0a4a314772ca",
+    "status": "ok"
+  },
+  "https://data.binance.vision/data/futures/um/daily/aggTrades/ETHUSDT/ETHUSDT-aggTrades-2023-05-02.zip": {
+    "byte_size": 12051465,
+    "ingested_at": "2026-07-02T14:23:33.669970+00:00",
+    "sha256": "5ef0e0cdcfe2dfa03b8f0a65d694c4f34f44d74f931f062cd4574fea8a5246ff",
+    "status": "ok"
+  },
+  "https://data.binance.vision/data/futures/um/daily/aggTrades/ETHUSDT/ETHUSDT-aggTrades-2023-05-03.zip": {
+    "byte_size": 16162518,
+    "ingested_at": "2026-07-02T14:23:35.824942+00:00",
+    "sha256": "1556360810d099293877f245117ebf9f80fa7c8b2c004e8f4bd607581d6a3db7",
+    "status": "ok"
+  },
+  "https://data.binance.vision/data/futures/um/daily/aggTrades/ETHUSDT/ETHUSDT-aggTrades-2023-05-04.zip": {
+    "byte_size": 10835150,
+    "ingested_at": "2026-07-02T14:23:37.704250+00:00",
+    "sha256": "b3853f9e2a298f051567c5757173e5bb93fecd042d29c1213e7b89ed5061601b",
+    "status": "ok"
+  },
+  "https://data.binance.vision/data/futures/um/daily/aggTrades/ETHUSDT/ETHUSDT-aggTrades-2023-05-05.zip": {
+    "byte_size": 18538354,
+    "ingested_at": "2026-07-02T14:23:39.896323+00:00",
+    "sha256": "a2128cd221a78ac74fc9e66c47dfbf39eaa196d8f2ad9c979bc9004d7ab34afd",
+    "status": "ok"
+  },
+  "https://data.binance.vision/data/futures/um/daily/aggTrades/ETHUSDT/ETHUSDT-aggTrades-2023-05-07.zip": {
+    "byte_size": 12775928,
+    "ingested_at": "2026-07-02T14:23:41.899652+00:00",
+    "sha256": "976a8188a8758fe57509cbe0da9baaaf2309896437b94cbebeaa4f6d059de472",
+    "status": "ok"
+  },
+  "https://data.binance.vision/data/futures/um/daily/aggTrades/ETHUSDT/ETHUSDT-aggTrades-2023-05-08.zip": {
+    "byte_size": 18306549,
+    "ingested_at": "2026-07-02T14:23:43.930841+00:00",
+    "sha256": "3320f8dcec21f5752c9de7dccdac63ab0b6ae8f64a413e470e63275f36715f31",
+    "status": "ok"
+  },
+  "https://data.binance.vision/data/futures/um/daily/aggTrades/ETHUSDT/ETHUSDT-aggTrades-2023-05-09.zip": {
+    "byte_size": 10414549,
+    "ingested_at": "2026-07-02T14:23:46.021280+00:00",
+    "sha256": "616b1f9b5d01ce608b8d394d5a2f3e40c3e2b7c23cbecfdf2909701d12d31cc4",
+    "status": "ok"
+  },
   "https://data.binance.vision/data/futures/um/daily/aggTrades/ETHUSDT/ETHUSDT-aggTrades-2023-05-10.zip": {
     "byte_size": 17787058,
-    "ingested_at": "2026-07-02T10:07:54.392748+00:00",
+    "ingested_at": "2026-07-02T14:23:48.037497+00:00",
     "sha256": "ed1e77848dc5104884e03abc1893ac9a427e9a16330c8493548b7d4b3c920bf5",
+    "status": "ok"
+  },
+  "https://data.binance.vision/data/futures/um/daily/aggTrades/ETHUSDT/ETHUSDT-aggTrades-2023-05-11.zip": {
+    "byte_size": 15067016,
+    "ingested_at": "2026-07-02T14:23:50.231468+00:00",
+    "sha256": "cb87ab8d6375e28c38d497437d2549e08e412233f51d8481af2189b45443453f",
+    "status": "ok"
+  },
+  "https://data.binance.vision/data/futures/um/daily/aggTrades/ETHUSDT/ETHUSDT-aggTrades-2023-05-13.zip": {
+    "byte_size": 7774688,
+    "ingested_at": "2026-07-02T14:23:52.188131+00:00",
+    "sha256": "5c61d0222f55eafc62c90e2803a1b141717a33efff339508e8d358f2a72aedce",
     "status": "ok"
   },
   "https://data.binance.vision/data/futures/um/daily/bookDepth/BTCUSDT/BTCUSDT-bookDepth-2023-01-01.zip": {
@@ -7763,291 +7823,651 @@
     "sha256": "34e98e9921d6d106c20fd5b812dd4ffd36f06a5b1a931ae9b37faa39dc933725",
     "status": "ok"
   },
+  "https://data.binance.vision/data/futures/um/daily/klines/BTCUSDT/1m/BTCUSDT-1m-2026-06-01.zip": {
+    "byte_size": 62266,
+    "ingested_at": "2026-07-02T14:15:08.265164+00:00",
+    "sha256": "40906bd201c28edacf5ee57d06cb35b7a6a032fa33be56eecc8640d54c173a0d",
+    "status": "ok"
+  },
+  "https://data.binance.vision/data/futures/um/daily/klines/BTCUSDT/1m/BTCUSDT-1m-2026-06-02.zip": {
+    "byte_size": 64059,
+    "ingested_at": "2026-07-02T14:15:09.238477+00:00",
+    "sha256": "e54661b3573bc8a03581c1213fad5a32cf5153d630bccf8b298a42fe0257cc27",
+    "status": "ok"
+  },
+  "https://data.binance.vision/data/futures/um/daily/klines/BTCUSDT/1m/BTCUSDT-1m-2026-06-03.zip": {
+    "byte_size": 63902,
+    "ingested_at": "2026-07-02T14:15:10.136455+00:00",
+    "sha256": "450eb3068808ca249a498eb0a8d9bec4309b431a6e1e834fb3a516fe9b691d3e",
+    "status": "ok"
+  },
+  "https://data.binance.vision/data/futures/um/daily/klines/BTCUSDT/1m/BTCUSDT-1m-2026-06-04.zip": {
+    "byte_size": 65186,
+    "ingested_at": "2026-07-02T14:15:11.419751+00:00",
+    "sha256": "67d58ca75ff22401fa3c9b73c0968700c371d1839e7a2ddac60e2ecaf3215110",
+    "status": "ok"
+  },
+  "https://data.binance.vision/data/futures/um/daily/klines/BTCUSDT/1m/BTCUSDT-1m-2026-06-05.zip": {
+    "byte_size": 65584,
+    "ingested_at": "2026-07-02T14:15:12.727611+00:00",
+    "sha256": "ca90c48b7fef2c9d9029e7e6bcfbc52f9d8b23b75f96db0a6f213dcdcff56423",
+    "status": "ok"
+  },
+  "https://data.binance.vision/data/futures/um/daily/klines/BTCUSDT/1m/BTCUSDT-1m-2026-06-06.zip": {
+    "byte_size": 62763,
+    "ingested_at": "2026-07-02T14:15:13.711548+00:00",
+    "sha256": "8b9643c8eeb07e29583d376d2989d33d0f7ff98736402a00e7432cabc7bc25c5",
+    "status": "ok"
+  },
+  "https://data.binance.vision/data/futures/um/daily/klines/BTCUSDT/1m/BTCUSDT-1m-2026-06-07.zip": {
+    "byte_size": 62966,
+    "ingested_at": "2026-07-02T14:15:15.066001+00:00",
+    "sha256": "c4df3c032ca9632723713f97032c17a3279b1df2d8e4dd24b3c917fcb79877d8",
+    "status": "ok"
+  },
+  "https://data.binance.vision/data/futures/um/daily/klines/BTCUSDT/1m/BTCUSDT-1m-2026-06-08.zip": {
+    "byte_size": 63236,
+    "ingested_at": "2026-07-02T14:15:16.352071+00:00",
+    "sha256": "70a5d188df069abed8a425170823554855b290665fd04cc936c4b696b266df94",
+    "status": "ok"
+  },
+  "https://data.binance.vision/data/futures/um/daily/klines/BTCUSDT/1m/BTCUSDT-1m-2026-06-09.zip": {
+    "byte_size": 62887,
+    "ingested_at": "2026-07-02T14:15:17.683973+00:00",
+    "sha256": "2a1b78e9504915996023fd189b96751012c099a4b8b95833dcacdcf9d11997b9",
+    "status": "ok"
+  },
+  "https://data.binance.vision/data/futures/um/daily/klines/BTCUSDT/1m/BTCUSDT-1m-2026-06-10.zip": {
+    "byte_size": 62895,
+    "ingested_at": "2026-07-02T14:15:19.041872+00:00",
+    "sha256": "8107fa001eae6654e98b198eb1533a1654533c611163a5df3503d1c9552522d5",
+    "status": "ok"
+  },
+  "https://data.binance.vision/data/futures/um/daily/klines/BTCUSDT/1m/BTCUSDT-1m-2026-06-11.zip": {
+    "byte_size": 62209,
+    "ingested_at": "2026-07-02T14:15:20.357930+00:00",
+    "sha256": "a848452c304ca627426470e141ab4b154c585cf5edd35506712660bbf5a6576d",
+    "status": "ok"
+  },
+  "https://data.binance.vision/data/futures/um/daily/klines/BTCUSDT/1m/BTCUSDT-1m-2026-06-12.zip": {
+    "byte_size": 61590,
+    "ingested_at": "2026-07-02T14:15:21.633101+00:00",
+    "sha256": "fdd62675d3d53ac6beb8202533b8a840ee0056ed6201022a393d142b40213cd7",
+    "status": "ok"
+  },
+  "https://data.binance.vision/data/futures/um/daily/klines/BTCUSDT/1m/BTCUSDT-1m-2026-06-13.zip": {
+    "byte_size": 58820,
+    "ingested_at": "2026-07-02T14:15:22.881914+00:00",
+    "sha256": "851b9ff5845669b43f92b51cce951a3a9c1ed44cbdda6c1304901c8e52b38a85",
+    "status": "ok"
+  },
+  "https://data.binance.vision/data/futures/um/daily/klines/BTCUSDT/1m/BTCUSDT-1m-2026-06-14.zip": {
+    "byte_size": 59982,
+    "ingested_at": "2026-07-02T14:15:24.188708+00:00",
+    "sha256": "d555c0a2beaf5115151a5d48aebf821f3c56baa5c322ed61b4c0ba33ae6ec07c",
+    "status": "ok"
+  },
+  "https://data.binance.vision/data/futures/um/daily/klines/BTCUSDT/1m/BTCUSDT-1m-2026-06-15.zip": {
+    "byte_size": 61804,
+    "ingested_at": "2026-07-02T14:15:25.539724+00:00",
+    "sha256": "5c67bc104f733ec4e4f62204ad8ae739e531c5fabefe99ecf6c06de38378a0f4",
+    "status": "ok"
+  },
+  "https://data.binance.vision/data/futures/um/daily/klines/BTCUSDT/1m/BTCUSDT-1m-2026-06-16.zip": {
+    "byte_size": 61433,
+    "ingested_at": "2026-07-02T14:15:26.867117+00:00",
+    "sha256": "294467f3c0437358f4b88ecbb7c7f8d21af1a4e9671f6b1040be2f8c65dc9813",
+    "status": "ok"
+  },
+  "https://data.binance.vision/data/futures/um/daily/klines/BTCUSDT/1m/BTCUSDT-1m-2026-06-17.zip": {
+    "byte_size": 62185,
+    "ingested_at": "2026-07-02T14:15:28.253748+00:00",
+    "sha256": "cc52057825f51703d95d7e773983c6887ea5862d6631890ad48a8ebb05450cac",
+    "status": "ok"
+  },
+  "https://data.binance.vision/data/futures/um/daily/klines/BTCUSDT/1m/BTCUSDT-1m-2026-06-18.zip": {
+    "byte_size": 62056,
+    "ingested_at": "2026-07-02T14:15:29.550900+00:00",
+    "sha256": "2bd2876c0e722ff42aaf78d5009f4a609d2e8ba56cc500f66ce77240af40d94c",
+    "status": "ok"
+  },
+  "https://data.binance.vision/data/futures/um/daily/klines/BTCUSDT/1m/BTCUSDT-1m-2026-06-19.zip": {
+    "byte_size": 60589,
+    "ingested_at": "2026-07-02T14:15:30.882513+00:00",
+    "sha256": "7f70d9549a59444dfdaa595b1e0b22622a51bbc0961ff4c97493de45d3e59693",
+    "status": "ok"
+  },
+  "https://data.binance.vision/data/futures/um/daily/klines/BTCUSDT/1m/BTCUSDT-1m-2026-06-20.zip": {
+    "byte_size": 59697,
+    "ingested_at": "2026-07-02T14:15:32.053622+00:00",
+    "sha256": "bda8ffa6bcea2744afcef1bd4d422d71e1f4e7b239c123213f81ddd711479cc0",
+    "status": "ok"
+  },
+  "https://data.binance.vision/data/futures/um/daily/klines/BTCUSDT/1m/BTCUSDT-1m-2026-06-21.zip": {
+    "byte_size": 59363,
+    "ingested_at": "2026-07-02T14:15:33.099365+00:00",
+    "sha256": "5091ec31be8be924ed81f81fc066b527f6846b1858dc7abaf44fa1991442c43d",
+    "status": "ok"
+  },
+  "https://data.binance.vision/data/futures/um/daily/klines/BTCUSDT/1m/BTCUSDT-1m-2026-06-22.zip": {
+    "byte_size": 62018,
+    "ingested_at": "2026-07-02T14:15:34.417296+00:00",
+    "sha256": "8ebac0e4daeee32f603a2754905e0853061671d4e46f437a2863f6001b42906c",
+    "status": "ok"
+  },
+  "https://data.binance.vision/data/futures/um/daily/klines/BTCUSDT/1m/BTCUSDT-1m-2026-06-23.zip": {
+    "byte_size": 61831,
+    "ingested_at": "2026-07-02T14:15:35.716190+00:00",
+    "sha256": "f096cff5682351bc6f13d3b05d9065b4a142e52e03a6623c58d7e10eeba7c436",
+    "status": "ok"
+  },
+  "https://data.binance.vision/data/futures/um/daily/klines/BTCUSDT/1m/BTCUSDT-1m-2026-06-24.zip": {
+    "byte_size": 62796,
+    "ingested_at": "2026-07-02T14:15:36.808281+00:00",
+    "sha256": "0eec81ec95a7b83274f5cc2de611a609c1112f68d1a18b3b920577a1a36ca8fe",
+    "status": "ok"
+  },
+  "https://data.binance.vision/data/futures/um/daily/klines/BTCUSDT/1m/BTCUSDT-1m-2026-06-25.zip": {
+    "byte_size": 62918,
+    "ingested_at": "2026-07-02T14:15:38.081277+00:00",
+    "sha256": "f876e30759cdea92a2f2c060e51ace5ba76a58b9cf7453bee73039e5d6ab05de",
+    "status": "ok"
+  },
+  "https://data.binance.vision/data/futures/um/daily/klines/BTCUSDT/1m/BTCUSDT-1m-2026-06-26.zip": {
+    "byte_size": 63548,
+    "ingested_at": "2026-07-02T14:15:39.377129+00:00",
+    "sha256": "49c50d19ae954a69547ee4e4e18336eba9776b7603a39bb512f025cf31e44489",
+    "status": "ok"
+  },
+  "https://data.binance.vision/data/futures/um/daily/klines/BTCUSDT/1m/BTCUSDT-1m-2026-06-27.zip": {
+    "byte_size": 59535,
+    "ingested_at": "2026-07-02T14:15:40.316409+00:00",
+    "sha256": "cd5b2f34ce6416edbfbede92ce1f589d8401af8ea8be0a9e5efb72e2732507eb",
+    "status": "ok"
+  },
+  "https://data.binance.vision/data/futures/um/daily/klines/BTCUSDT/1m/BTCUSDT-1m-2026-06-28.zip": {
+    "byte_size": 60178,
+    "ingested_at": "2026-07-02T14:15:41.684590+00:00",
+    "sha256": "fce6c076be27e519eb17d03fe4b9481c134251013fa54d7b6b89f2d9c51dffe6",
+    "status": "ok"
+  },
+  "https://data.binance.vision/data/futures/um/daily/klines/BTCUSDT/1m/BTCUSDT-1m-2026-06-29.zip": {
+    "byte_size": 62731,
+    "ingested_at": "2026-07-02T14:15:43.007725+00:00",
+    "sha256": "12677e18b6cc6575316011203ee167ad6b8e9e5d224c0aea4b46f87db13f9d9a",
+    "status": "ok"
+  },
+  "https://data.binance.vision/data/futures/um/daily/klines/BTCUSDT/1m/BTCUSDT-1m-2026-06-30.zip": {
+    "byte_size": 61904,
+    "ingested_at": "2026-07-02T14:15:44.318870+00:00",
+    "sha256": "f0febfe771e46a18abd48052697903a40709ceb7a7d308022b63e173822eec0a",
+    "status": "ok"
+  },
+  "https://data.binance.vision/data/futures/um/daily/klines/ETHUSDT/1m/ETHUSDT-1m-2026-06-01.zip": {
+    "byte_size": 63647,
+    "ingested_at": "2026-07-02T14:15:45.687666+00:00",
+    "sha256": "2fe03b97e81e70960eb24e8caa759f62efee6c6f35e25d5584922a6acb8945eb",
+    "status": "ok"
+  },
+  "https://data.binance.vision/data/futures/um/daily/klines/ETHUSDT/1m/ETHUSDT-1m-2026-06-02.zip": {
+    "byte_size": 64752,
+    "ingested_at": "2026-07-02T14:15:46.977494+00:00",
+    "sha256": "4aa0a11aecf0bbf410dd4d14e15684233e7438a390b7e78c991fc81549910dce",
+    "status": "ok"
+  },
+  "https://data.binance.vision/data/futures/um/daily/klines/ETHUSDT/1m/ETHUSDT-1m-2026-06-03.zip": {
+    "byte_size": 65347,
+    "ingested_at": "2026-07-02T14:15:48.131900+00:00",
+    "sha256": "e87b91550409df37c3bef4a3af3fb8ca15d5a1733cc59fc2b3ca9659a8b06ace",
+    "status": "ok"
+  },
+  "https://data.binance.vision/data/futures/um/daily/klines/ETHUSDT/1m/ETHUSDT-1m-2026-06-04.zip": {
+    "byte_size": 66055,
+    "ingested_at": "2026-07-02T14:15:49.445677+00:00",
+    "sha256": "dbe45c36708dd07fa302d21d2b0d75c9b13bdbfc4b3054e56c8f5e55d9fc84de",
+    "status": "ok"
+  },
+  "https://data.binance.vision/data/futures/um/daily/klines/ETHUSDT/1m/ETHUSDT-1m-2026-06-05.zip": {
+    "byte_size": 67268,
+    "ingested_at": "2026-07-02T14:15:50.739185+00:00",
+    "sha256": "75b76687b5521f8ea501d0065ed9d3eb7d8f2338174af786a4e41dde563c6cd1",
+    "status": "ok"
+  },
+  "https://data.binance.vision/data/futures/um/daily/klines/ETHUSDT/1m/ETHUSDT-1m-2026-06-06.zip": {
+    "byte_size": 64792,
+    "ingested_at": "2026-07-02T14:15:51.995216+00:00",
+    "sha256": "57cf660b7b241a0d465e3034bb01ddab861901afc47147b6da78fec37b57f2b5",
+    "status": "ok"
+  },
+  "https://data.binance.vision/data/futures/um/daily/klines/ETHUSDT/1m/ETHUSDT-1m-2026-06-07.zip": {
+    "byte_size": 64428,
+    "ingested_at": "2026-07-02T14:15:53.326454+00:00",
+    "sha256": "b3e5ab9f162bd6baeae234c115be8896ec987587130275e0ffe60fd6f1e5e605",
+    "status": "ok"
+  },
+  "https://data.binance.vision/data/futures/um/daily/klines/ETHUSDT/1m/ETHUSDT-1m-2026-06-08.zip": {
+    "byte_size": 64832,
+    "ingested_at": "2026-07-02T14:15:54.586041+00:00",
+    "sha256": "d8a1ed6aeb3f015aebae599aa6c70d2c546065a19725d5e1ddacb260b9628aef",
+    "status": "ok"
+  },
+  "https://data.binance.vision/data/futures/um/daily/klines/ETHUSDT/1m/ETHUSDT-1m-2026-06-09.zip": {
+    "byte_size": 64148,
+    "ingested_at": "2026-07-02T14:15:55.636052+00:00",
+    "sha256": "644a72e4ee38b5aadb0bd2346e4953d1f6c7c49271b93f821f50934876218281",
+    "status": "ok"
+  },
+  "https://data.binance.vision/data/futures/um/daily/klines/ETHUSDT/1m/ETHUSDT-1m-2026-06-10.zip": {
+    "byte_size": 64413,
+    "ingested_at": "2026-07-02T14:15:56.890516+00:00",
+    "sha256": "ca5abb584b66b2dea1b83982804654071af3e4340f4610a9eb37317d596b1e24",
+    "status": "ok"
+  },
+  "https://data.binance.vision/data/futures/um/daily/klines/ETHUSDT/1m/ETHUSDT-1m-2026-06-11.zip": {
+    "byte_size": 63547,
+    "ingested_at": "2026-07-02T14:15:58.028255+00:00",
+    "sha256": "4fdb47767fe3cad0d533a94687353f559d204a796f10df3021dccd51a5629ae4",
+    "status": "ok"
+  },
+  "https://data.binance.vision/data/futures/um/daily/klines/ETHUSDT/1m/ETHUSDT-1m-2026-06-12.zip": {
+    "byte_size": 62519,
+    "ingested_at": "2026-07-02T14:15:59.288911+00:00",
+    "sha256": "cd9566b4c4d560a919965184dfd2b1d93b2d12a37a8530ae5a0956eccd6f5931",
+    "status": "ok"
+  },
+  "https://data.binance.vision/data/futures/um/daily/klines/ETHUSDT/1m/ETHUSDT-1m-2026-06-13.zip": {
+    "byte_size": 60001,
+    "ingested_at": "2026-07-02T14:16:00.570022+00:00",
+    "sha256": "f94475b4afdfbd0cd0f4f4f3b57bc8b007690a305dd0f340b950b455a7c3a8d6",
+    "status": "ok"
+  },
+  "https://data.binance.vision/data/futures/um/daily/klines/ETHUSDT/1m/ETHUSDT-1m-2026-06-14.zip": {
+    "byte_size": 60681,
+    "ingested_at": "2026-07-02T14:16:01.804685+00:00",
+    "sha256": "4b00a7c78febd0fb7d175d39b8275e924ca91e42e60bffc0bb617dfd76fbe4e8",
+    "status": "ok"
+  },
+  "https://data.binance.vision/data/futures/um/daily/klines/ETHUSDT/1m/ETHUSDT-1m-2026-06-15.zip": {
+    "byte_size": 63689,
+    "ingested_at": "2026-07-02T14:16:03.213143+00:00",
+    "sha256": "c8ee639cf8d23983920242fb513421fbb768e7c387e444eb44dfce8b5011a5b5",
+    "status": "ok"
+  },
+  "https://data.binance.vision/data/futures/um/daily/klines/ETHUSDT/1m/ETHUSDT-1m-2026-06-16.zip": {
+    "byte_size": 63753,
+    "ingested_at": "2026-07-02T14:16:04.504472+00:00",
+    "sha256": "3e8b76092007e04225b57495c5a46c88f6375d69ee3eec4181fd3e310d66f7dc",
+    "status": "ok"
+  },
+  "https://data.binance.vision/data/futures/um/daily/klines/ETHUSDT/1m/ETHUSDT-1m-2026-06-17.zip": {
+    "byte_size": 63838,
+    "ingested_at": "2026-07-02T14:16:05.778829+00:00",
+    "sha256": "324b7eb5c881f70442ffb0444c705c9bf9a02eaddc68c82c30b6dec8412ad586",
+    "status": "ok"
+  },
+  "https://data.binance.vision/data/futures/um/daily/klines/ETHUSDT/1m/ETHUSDT-1m-2026-06-18.zip": {
+    "byte_size": 63522,
+    "ingested_at": "2026-07-02T14:16:06.955036+00:00",
+    "sha256": "f3af8c8cd3c9785d8a73693f2c505e2b63043f0cfefa260e870d1ac505d481d4",
+    "status": "ok"
+  },
+  "https://data.binance.vision/data/futures/um/daily/klines/ETHUSDT/1m/ETHUSDT-1m-2026-06-19.zip": {
+    "byte_size": 62052,
+    "ingested_at": "2026-07-02T14:16:08.105158+00:00",
+    "sha256": "6dda249738608250c19a0e69e30a28446cde80a7cf0b9a3db28abb9d48640155",
+    "status": "ok"
+  },
+  "https://data.binance.vision/data/futures/um/daily/klines/ETHUSDT/1m/ETHUSDT-1m-2026-06-20.zip": {
+    "byte_size": 61285,
+    "ingested_at": "2026-07-02T14:16:09.261111+00:00",
+    "sha256": "a2a5fa81aa74581c2ae7002fb166f50e48108085179ee3f19bd96e6a18c7c499",
+    "status": "ok"
+  },
+  "https://data.binance.vision/data/futures/um/daily/klines/ETHUSDT/1m/ETHUSDT-1m-2026-06-21.zip": {
+    "byte_size": 60933,
+    "ingested_at": "2026-07-02T14:16:10.557906+00:00",
+    "sha256": "90598182719d99cf9be5ceec994a42cfa5e87adc04d8aef86a5a5e6eb1c68001",
+    "status": "ok"
+  },
+  "https://data.binance.vision/data/futures/um/daily/klines/ETHUSDT/1m/ETHUSDT-1m-2026-06-22.zip": {
+    "byte_size": 63195,
+    "ingested_at": "2026-07-02T14:16:11.847753+00:00",
+    "sha256": "879a5a16cf841eeea04d3c7d678c8231da83b48dc158c5725f33242b7bed9144",
+    "status": "ok"
+  },
+  "https://data.binance.vision/data/futures/um/daily/klines/ETHUSDT/1m/ETHUSDT-1m-2026-06-23.zip": {
+    "byte_size": 62907,
+    "ingested_at": "2026-07-02T14:16:12.934346+00:00",
+    "sha256": "119807ae2f3fff0cd8c27d9eb2735f76bae1337f523394224afc3655c1322f20",
+    "status": "ok"
+  },
+  "https://data.binance.vision/data/futures/um/daily/klines/ETHUSDT/1m/ETHUSDT-1m-2026-06-24.zip": {
+    "byte_size": 63903,
+    "ingested_at": "2026-07-02T14:16:14.084914+00:00",
+    "sha256": "60913a57636a274c1b6d8eefb645898ec96d17c9f563e7ccd08708bd0a6db737",
+    "status": "ok"
+  },
+  "https://data.binance.vision/data/futures/um/daily/klines/ETHUSDT/1m/ETHUSDT-1m-2026-06-25.zip": {
+    "byte_size": 63788,
+    "ingested_at": "2026-07-02T14:16:15.400041+00:00",
+    "sha256": "c0d96b13e26819e40d50a4110d4d9284935c19003ae3205927000a522dc10bb3",
+    "status": "ok"
+  },
+  "https://data.binance.vision/data/futures/um/daily/klines/ETHUSDT/1m/ETHUSDT-1m-2026-06-26.zip": {
+    "byte_size": 64429,
+    "ingested_at": "2026-07-02T14:16:16.685978+00:00",
+    "sha256": "cb2762a5e495ff01f4b7441893399215f287dcc2cf1cda53262ba7c4b1bfe48d",
+    "status": "ok"
+  },
+  "https://data.binance.vision/data/futures/um/daily/klines/ETHUSDT/1m/ETHUSDT-1m-2026-06-27.zip": {
+    "byte_size": 60841,
+    "ingested_at": "2026-07-02T14:16:17.995932+00:00",
+    "sha256": "f2a08a3acf2a4718f9a013a7113a4261f590da08a27ecd17f34f041344ea21a6",
+    "status": "ok"
+  },
+  "https://data.binance.vision/data/futures/um/daily/klines/ETHUSDT/1m/ETHUSDT-1m-2026-06-28.zip": {
+    "byte_size": 61399,
+    "ingested_at": "2026-07-02T14:16:19.130796+00:00",
+    "sha256": "1296253211f92fe9d7b4687fac6539c052d14aa898cad9b94645f4595169b692",
+    "status": "ok"
+  },
+  "https://data.binance.vision/data/futures/um/daily/klines/ETHUSDT/1m/ETHUSDT-1m-2026-06-29.zip": {
+    "byte_size": 63719,
+    "ingested_at": "2026-07-02T14:16:20.258454+00:00",
+    "sha256": "2885930241072dac5c73aed78d7a918a76f93dddff623e0a1fbe8c3b70199bb3",
+    "status": "ok"
+  },
+  "https://data.binance.vision/data/futures/um/daily/klines/ETHUSDT/1m/ETHUSDT-1m-2026-06-30.zip": {
+    "byte_size": 62469,
+    "ingested_at": "2026-07-02T14:16:21.649869+00:00",
+    "sha256": "65d6db7cdb41b74926315198146bb1286671ffe87505316badc3450e0a90da48",
+    "status": "ok"
+  },
   "https://data.binance.vision/data/futures/um/monthly/aggTrades/BTCUSDT/BTCUSDT-aggTrades-2022-07.zip": {
     "byte_size": 829086641,
-    "ingested_at": "2026-07-02T08:39:47.019916+00:00",
+    "ingested_at": "2026-07-02T14:03:20.040398+00:00",
     "sha256": "5facf3abcde715b0c625ee5c9837f148bf3c79d0b107122ef78812df3a5636fb",
     "status": "ok"
   },
   "https://data.binance.vision/data/futures/um/monthly/aggTrades/BTCUSDT/BTCUSDT-aggTrades-2022-08.zip": {
     "byte_size": 541529123,
-    "ingested_at": "2026-07-02T10:03:34.540787+00:00",
+    "ingested_at": "2026-07-02T14:03:34.714470+00:00",
     "sha256": "e9232addc9ebc351b327280e23d75785ee3639cc32ae9054293a6c0481d9fb89",
     "status": "ok"
   },
   "https://data.binance.vision/data/futures/um/monthly/aggTrades/BTCUSDT/BTCUSDT-aggTrades-2022-09.zip": {
     "byte_size": 548619640,
-    "ingested_at": "2026-07-02T10:04:14.869868+00:00",
+    "ingested_at": "2026-07-02T14:03:49.299937+00:00",
     "sha256": "b39acd27634cdb861fce7196182110f585b6c17fae7baae116f0d72ecd5f891b",
     "status": "ok"
   },
   "https://data.binance.vision/data/futures/um/monthly/aggTrades/BTCUSDT/BTCUSDT-aggTrades-2022-10.zip": {
     "byte_size": 382702187,
-    "ingested_at": "2026-07-02T10:04:40.271188+00:00",
+    "ingested_at": "2026-07-02T14:03:59.696340+00:00",
     "sha256": "94ce0bc37751a64ed4fd425aa7b021c1ee43ff52c4a531b6d524063685e03ffe",
     "status": "ok"
   },
   "https://data.binance.vision/data/futures/um/monthly/aggTrades/BTCUSDT/BTCUSDT-aggTrades-2022-11.zip": {
     "byte_size": 465824209,
-    "ingested_at": "2026-07-02T10:05:01.511086+00:00",
+    "ingested_at": "2026-07-02T14:04:12.169834+00:00",
     "sha256": "0eb04067026d5d9493c1b5c14b45d1e0a04ed281d627f0ae480f6604665ccad8",
     "status": "ok"
   },
   "https://data.binance.vision/data/futures/um/monthly/aggTrades/BTCUSDT/BTCUSDT-aggTrades-2022-12.zip": {
     "byte_size": 235806432,
-    "ingested_at": "2026-07-02T08:41:41.619828+00:00",
+    "ingested_at": "2026-07-02T14:04:19.319947+00:00",
     "sha256": "dc966c85fe09ddce5b39f448c6760aa062917af27ecf2aa94b989e795d87a19d",
     "status": "ok"
   },
   "https://data.binance.vision/data/futures/um/monthly/aggTrades/BTCUSDT/BTCUSDT-aggTrades-2023-01.zip": {
     "byte_size": 388543348,
-    "ingested_at": "2026-07-02T08:41:58.406518+00:00",
+    "ingested_at": "2026-07-02T14:04:29.383178+00:00",
     "sha256": "1d94d39b36b5e15bf1b6df323ef0764d9b7a5ec648a87d7b9388dc661c900c66",
     "status": "ok"
   },
   "https://data.binance.vision/data/futures/um/monthly/aggTrades/BTCUSDT/BTCUSDT-aggTrades-2023-02.zip": {
     "byte_size": 432051041,
-    "ingested_at": "2026-07-02T08:42:23.664058+00:00",
+    "ingested_at": "2026-07-02T14:04:40.659491+00:00",
     "sha256": "c96a721238c9dca750ec5498501e3a5091d96f5f95f9b8878a9496e168e5a46d",
     "status": "ok"
   },
   "https://data.binance.vision/data/futures/um/monthly/aggTrades/BTCUSDT/BTCUSDT-aggTrades-2023-03.zip": {
     "byte_size": 767678501,
-    "ingested_at": "2026-07-02T08:42:59.166439+00:00",
+    "ingested_at": "2026-07-02T14:05:00.567161+00:00",
     "sha256": "b527a01289ba5c1804219a9eaf5cf684e8a401b7d66a79f8fcaa488d8ad990ac",
     "status": "ok"
   },
   "https://data.binance.vision/data/futures/um/monthly/aggTrades/BTCUSDT/BTCUSDT-aggTrades-2023-04.zip": {
     "byte_size": 512842183,
-    "ingested_at": "2026-07-02T08:43:37.717898+00:00",
+    "ingested_at": "2026-07-02T14:05:14.691343+00:00",
     "sha256": "ccf03f522d5f84597dfb714c350ccf6224f7b640918aed4cdd6e08c31cad0de7",
     "status": "ok"
   },
   "https://data.binance.vision/data/futures/um/monthly/aggTrades/BTCUSDT/BTCUSDT-aggTrades-2023-05.zip": {
     "byte_size": 468405603,
-    "ingested_at": "2026-07-02T10:05:27.055025+00:00",
+    "ingested_at": "2026-07-02T14:05:27.292417+00:00",
     "sha256": "301acec76a7644aa73180fd7f8d913ce4eecfa7e7bca5057f1782f96d91b9ef0",
     "status": "ok"
   },
   "https://data.binance.vision/data/futures/um/monthly/aggTrades/BTCUSDT/BTCUSDT-aggTrades-2023-06.zip": {
     "byte_size": 509287275,
-    "ingested_at": "2026-07-02T08:39:06.950360+00:00",
+    "ingested_at": "2026-07-02T14:05:39.887561+00:00",
     "sha256": "36bbf14b48f8552c57ee79c6f3054bbc2aa58d90206a1ead2a0ec1b42b9954d8",
     "status": "ok"
   },
   "https://data.binance.vision/data/futures/um/monthly/aggTrades/BTCUSDT/BTCUSDT-aggTrades-2023-07.zip": {
     "byte_size": 329652487,
-    "ingested_at": "2026-07-02T08:44:34.177006+00:00",
+    "ingested_at": "2026-07-02T14:05:48.974574+00:00",
     "sha256": "03607e1cb87a22462898b1dcfbd5b96de72e2eb5912124ae12aa4576d122b78a",
     "status": "ok"
   },
   "https://data.binance.vision/data/futures/um/monthly/aggTrades/BTCUSDT/BTCUSDT-aggTrades-2023-08.zip": {
     "byte_size": 316899048,
-    "ingested_at": "2026-07-02T08:44:55.954495+00:00",
+    "ingested_at": "2026-07-02T14:05:58.109604+00:00",
     "sha256": "de112685f8f6bf7d6341fdee2ea46075d8661926cbcff7c478466be3f6ac9b52",
     "status": "ok"
   },
   "https://data.binance.vision/data/futures/um/monthly/aggTrades/BTCUSDT/BTCUSDT-aggTrades-2023-09.zip": {
     "byte_size": 295563986,
-    "ingested_at": "2026-07-02T08:45:16.243457+00:00",
+    "ingested_at": "2026-07-02T14:06:06.374814+00:00",
     "sha256": "15cd54b4be3d6f5975a6e6e237ecad37c524db9a39be276784b5881a2737e7cf",
     "status": "ok"
   },
   "https://data.binance.vision/data/futures/um/monthly/aggTrades/BTCUSDT/BTCUSDT-aggTrades-2023-10.zip": {
     "byte_size": 492720741,
-    "ingested_at": "2026-07-02T08:45:40.956358+00:00",
+    "ingested_at": "2026-07-02T14:06:19.488385+00:00",
     "sha256": "d3fe5fa477d68d6730248d634e1bd37ae4838839d78709ef355d9d9c6749fea4",
     "status": "ok"
   },
   "https://data.binance.vision/data/futures/um/monthly/aggTrades/BTCUSDT/BTCUSDT-aggTrades-2023-11.zip": {
     "byte_size": 408417791,
-    "ingested_at": "2026-07-02T08:46:09.920902+00:00",
+    "ingested_at": "2026-07-02T14:06:30.278189+00:00",
     "sha256": "64d34dc8970219f232cc2e5655fef1a3af6064d17399e1b1624f82525d6ea518",
     "status": "ok"
   },
   "https://data.binance.vision/data/futures/um/monthly/aggTrades/BTCUSDT/BTCUSDT-aggTrades-2023-12.zip": {
     "byte_size": 431442108,
-    "ingested_at": "2026-07-02T08:46:36.659754+00:00",
+    "ingested_at": "2026-07-02T14:06:42.742360+00:00",
     "sha256": "f56d85c15dc93b658f808c56688658d9f9aabe9797823b973830b3696642d03f",
     "status": "ok"
   },
   "https://data.binance.vision/data/futures/um/monthly/aggTrades/BTCUSDT/BTCUSDT-aggTrades-2024-01.zip": {
     "byte_size": 522743749,
-    "ingested_at": "2026-07-02T08:47:06.761814+00:00",
+    "ingested_at": "2026-07-02T14:06:56.251931+00:00",
     "sha256": "d752f50932091dd209803187ca2354a9eadbfe8e4b9c481c3581a1bbb1bd8282",
     "status": "ok"
   },
   "https://data.binance.vision/data/futures/um/monthly/aggTrades/BTCUSDT/BTCUSDT-aggTrades-2024-02.zip": {
     "byte_size": 472350747,
-    "ingested_at": "2026-07-02T08:47:38.325571+00:00",
+    "ingested_at": "2026-07-02T14:07:08.354065+00:00",
     "sha256": "3c2426d3f2435ace18b0e9b3acf45144b1710dad08cb184487539d5d829ccef3",
     "status": "ok"
   },
   "https://data.binance.vision/data/futures/um/monthly/aggTrades/BTCUSDT/BTCUSDT-aggTrades-2024-03.zip": {
     "byte_size": 847406944,
-    "ingested_at": "2026-07-02T08:48:17.234214+00:00",
+    "ingested_at": "2026-07-02T14:07:29.332531+00:00",
     "sha256": "8ceb6fd06fc3bff87870e7adc362ca0e2f463f57a04599d2506e40320921401d",
     "status": "ok"
   },
   "https://data.binance.vision/data/futures/um/monthly/aggTrades/BTCUSDT/BTCUSDT-aggTrades-2024-04.zip": {
     "byte_size": 673475890,
-    "ingested_at": "2026-07-02T08:49:01.598949+00:00",
+    "ingested_at": "2026-07-02T14:07:46.730027+00:00",
     "sha256": "d1e56775acae2b93b387df44f6074e94fb635dfdb65271537889e32e1556f05d",
     "status": "ok"
   },
   "https://data.binance.vision/data/futures/um/monthly/aggTrades/BTCUSDT/BTCUSDT-aggTrades-2024-05.zip": {
     "byte_size": 502066717,
-    "ingested_at": "2026-07-02T08:49:37.882933+00:00",
+    "ingested_at": "2026-07-02T14:07:59.894356+00:00",
     "sha256": "8fca38cac627bb1fb3a5c9982ce56351be6783ec136369a3e856ae49bb971a43",
     "status": "ok"
   },
   "https://data.binance.vision/data/futures/um/monthly/aggTrades/BTCUSDT/BTCUSDT-aggTrades-2024-06.zip": {
     "byte_size": 340036587,
-    "ingested_at": "2026-07-02T08:50:05.144689+00:00",
+    "ingested_at": "2026-07-02T14:08:09.156207+00:00",
     "sha256": "5ded996c5ee1985b4e3d7935f9be95c2e1f946a173fd87dbb0107c02fa68ca89",
     "status": "ok"
   },
   "https://data.binance.vision/data/futures/um/monthly/aggTrades/BTCUSDT/BTCUSDT-aggTrades-2024-07.zip": {
     "byte_size": 488332735,
-    "ingested_at": "2026-07-02T08:50:30.579370+00:00",
+    "ingested_at": "2026-07-02T14:08:29.896742+00:00",
     "sha256": "d6a6528d6fb5a78ddcc0607469e9569f40ab497359b2e3ba876145a5463d68c5",
     "status": "ok"
   },
   "https://data.binance.vision/data/futures/um/monthly/aggTrades/BTCUSDT/BTCUSDT-aggTrades-2024-08.zip": {
     "byte_size": 621175912,
-    "ingested_at": "2026-07-02T08:51:04.335875+00:00",
+    "ingested_at": "2026-07-02T14:08:45.284758+00:00",
     "sha256": "91c95f779e58f8aea2735c838085dcaaaf0a9f3e162ebf9cd477b686666a93c8",
     "status": "ok"
   },
   "https://data.binance.vision/data/futures/um/monthly/aggTrades/BTCUSDT/BTCUSDT-aggTrades-2024-09.zip": {
     "byte_size": 457356098,
-    "ingested_at": "2026-07-02T08:51:37.485112+00:00",
+    "ingested_at": "2026-07-02T14:08:57.195489+00:00",
     "sha256": "3450edcaeb8a2c7f2f70f3136cc28753245311452369de0e990fad390a5a9113",
     "status": "ok"
   },
   "https://data.binance.vision/data/futures/um/monthly/aggTrades/BTCUSDT/BTCUSDT-aggTrades-2024-10.zip": {
     "byte_size": 480827973,
-    "ingested_at": "2026-07-02T08:52:06.820055+00:00",
+    "ingested_at": "2026-07-02T14:09:10.413663+00:00",
     "sha256": "f8c76ee5d4467c85a592d7ef9433ee6f7f7c4b2af9c1b9b2538ae4795f60dad3",
     "status": "ok"
   },
   "https://data.binance.vision/data/futures/um/monthly/aggTrades/BTCUSDT/BTCUSDT-aggTrades-2024-11.zip": {
     "byte_size": 729944402,
-    "ingested_at": "2026-07-02T08:52:42.626012+00:00",
+    "ingested_at": "2026-07-02T14:09:29.041229+00:00",
     "sha256": "28a34b83dc97c8519515d5a2982629906d748a98e7a9aa52796ad1d1380d9fe7",
     "status": "ok"
   },
   "https://data.binance.vision/data/futures/um/monthly/aggTrades/BTCUSDT/BTCUSDT-aggTrades-2024-12.zip": {
     "byte_size": 683913057,
-    "ingested_at": "2026-07-02T08:53:24.287905+00:00",
+    "ingested_at": "2026-07-02T14:09:46.561341+00:00",
     "sha256": "4d17630b90c9497bfba4d18e94d5fb8a66d8ade41ecab1583824baffd6d8a513",
     "status": "ok"
   },
   "https://data.binance.vision/data/futures/um/monthly/aggTrades/BTCUSDT/BTCUSDT-aggTrades-2025-01.zip": {
     "byte_size": 692363439,
-    "ingested_at": "2026-07-02T08:54:05.593669+00:00",
+    "ingested_at": "2026-07-02T14:10:04.566492+00:00",
     "sha256": "9a4dedaeb6e2ac6896856781a659e5508debcd5071558c501b648cb39a123eaa",
     "status": "ok"
   },
   "https://data.binance.vision/data/futures/um/monthly/aggTrades/BTCUSDT/BTCUSDT-aggTrades-2025-02.zip": {
     "byte_size": 567527394,
-    "ingested_at": "2026-07-02T08:54:43.468590+00:00",
+    "ingested_at": "2026-07-02T14:10:19.572655+00:00",
     "sha256": "bf4ae9e44d47a44a8b553e4afbf074f3a6b6af15b05faeb4ce6f76e4ad82ea8a",
     "status": "ok"
   },
   "https://data.binance.vision/data/futures/um/monthly/aggTrades/BTCUSDT/BTCUSDT-aggTrades-2025-03.zip": {
     "byte_size": 708582622,
-    "ingested_at": "2026-07-02T08:55:21.792229+00:00",
+    "ingested_at": "2026-07-02T14:10:37.934986+00:00",
     "sha256": "41a362b0560a6b0ef1c457831cb60789fec779684b1d31f665d4c95a438db3c1",
     "status": "ok"
   },
   "https://data.binance.vision/data/futures/um/monthly/aggTrades/BTCUSDT/BTCUSDT-aggTrades-2025-04.zip": {
     "byte_size": 596176579,
-    "ingested_at": "2026-07-02T08:56:00.802228+00:00",
+    "ingested_at": "2026-07-02T14:10:53.675131+00:00",
     "sha256": "edff11b0f0558e569f42bbeacf3250339cda26d994ffc3baf6c286b5c5b78c3b",
     "status": "ok"
   },
   "https://data.binance.vision/data/futures/um/monthly/aggTrades/BTCUSDT/BTCUSDT-aggTrades-2025-05.zip": {
     "byte_size": 504086793,
-    "ingested_at": "2026-07-02T08:56:34.155917+00:00",
+    "ingested_at": "2026-07-02T14:11:07.333221+00:00",
     "sha256": "ca849dfc75fed55cc1a12703351a68797f7541b289085c8f4622e8a8d3c3c5d3",
     "status": "ok"
   },
   "https://data.binance.vision/data/futures/um/monthly/aggTrades/BTCUSDT/BTCUSDT-aggTrades-2025-06.zip": {
     "byte_size": 407768914,
-    "ingested_at": "2026-07-02T08:57:03.353042+00:00",
+    "ingested_at": "2026-07-02T14:11:18.507487+00:00",
     "sha256": "c815b84f96b764e428b3da2b3060d145b92cafde5d74a697ec95ae006db54f71",
     "status": "ok"
   },
   "https://data.binance.vision/data/futures/um/monthly/aggTrades/BTCUSDT/BTCUSDT-aggTrades-2025-07.zip": {
     "byte_size": 393122038,
-    "ingested_at": "2026-07-02T08:57:28.933624+00:00",
+    "ingested_at": "2026-07-02T14:11:29.181189+00:00",
     "sha256": "a71064a7407dcc1fda4e1a7a60a77bb03dffa1c3cd0c4813a3e5bcc96a9591de",
     "status": "ok"
   },
   "https://data.binance.vision/data/futures/um/monthly/aggTrades/BTCUSDT/BTCUSDT-aggTrades-2025-08.zip": {
     "byte_size": 430144584,
-    "ingested_at": "2026-07-02T08:57:54.921056+00:00",
+    "ingested_at": "2026-07-02T14:11:41.180715+00:00",
     "sha256": "5ff7c5bbfb8c00b5f9627f70cbc1d82b3f2727ca1d2cc422c27e979771a16928",
     "status": "ok"
   },
   "https://data.binance.vision/data/futures/um/monthly/aggTrades/BTCUSDT/BTCUSDT-aggTrades-2025-09.zip": {
     "byte_size": 338553600,
-    "ingested_at": "2026-07-02T08:58:20.698902+00:00",
+    "ingested_at": "2026-07-02T14:11:51.019000+00:00",
     "sha256": "ea3aa46d8f4c8275379f29d1efee41bf9f549b2a315bc4e32836f4330a16d63a",
     "status": "ok"
   },
   "https://data.binance.vision/data/futures/um/monthly/aggTrades/BTCUSDT/BTCUSDT-aggTrades-2025-10.zip": {
     "byte_size": 678684486,
-    "ingested_at": "2026-07-02T08:58:51.121724+00:00",
+    "ingested_at": "2026-07-02T14:12:09.124263+00:00",
     "sha256": "89087666ced6455db10f39a1725c09a23e6c3432fc3c65c4df221617c259cd1f",
     "status": "ok"
   },
   "https://data.binance.vision/data/futures/um/monthly/aggTrades/BTCUSDT/BTCUSDT-aggTrades-2025-11.zip": {
     "byte_size": 776936266,
-    "ingested_at": "2026-07-02T08:59:33.924778+00:00",
+    "ingested_at": "2026-07-02T14:12:30.013412+00:00",
     "sha256": "58b7bcada7ff83f072b00aa416929b10733351e7a8c835af1c3ca5f22d89fffa",
     "status": "ok"
   },
   "https://data.binance.vision/data/futures/um/monthly/aggTrades/BTCUSDT/BTCUSDT-aggTrades-2025-12.zip": {
     "byte_size": 609312983,
-    "ingested_at": "2026-07-02T09:00:16.014800+00:00",
+    "ingested_at": "2026-07-02T14:12:46.187564+00:00",
     "sha256": "cf1a54ff0406bd0a901ad631acbe429764924a9907ee185f2b6096add4735312",
     "status": "ok"
   },
   "https://data.binance.vision/data/futures/um/monthly/aggTrades/BTCUSDT/BTCUSDT-aggTrades-2026-01.zip": {
     "byte_size": 542757450,
-    "ingested_at": "2026-07-02T09:00:50.837862+00:00",
+    "ingested_at": "2026-07-02T14:13:00.893237+00:00",
     "sha256": "bf5b857119a980809dc46ea468b6cd298131020427382fb8da53f8b392209a52",
     "status": "ok"
   },
   "https://data.binance.vision/data/futures/um/monthly/aggTrades/BTCUSDT/BTCUSDT-aggTrades-2026-02.zip": {
     "byte_size": 1006713302,
-    "ingested_at": "2026-07-02T09:01:34.846665+00:00",
+    "ingested_at": "2026-07-02T14:13:26.338470+00:00",
     "sha256": "7e7b0eb57ae1844421a6ff5f480c0173efd8a68736990d41c33afa34176ab3ca",
     "status": "ok"
   },
   "https://data.binance.vision/data/futures/um/monthly/aggTrades/BTCUSDT/BTCUSDT-aggTrades-2026-03.zip": {
     "byte_size": 799224859,
-    "ingested_at": "2026-07-02T09:02:15.650042+00:00",
+    "ingested_at": "2026-07-02T14:13:47.560494+00:00",
     "sha256": "c7c5ab2c42b51e6625ed6921d492119f03738b2fa8967c3036efcf953591d48f",
     "status": "ok"
   },
   "https://data.binance.vision/data/futures/um/monthly/aggTrades/BTCUSDT/BTCUSDT-aggTrades-2026-04.zip": {
     "byte_size": 508207480,
-    "ingested_at": "2026-07-02T09:02:51.838971+00:00",
+    "ingested_at": "2026-07-02T14:14:01.176592+00:00",
     "sha256": "01b16dea0961c64b4cb52ca47e780b618867222beb77a733f0e7bad796835e65",
     "status": "ok"
   },
   "https://data.binance.vision/data/futures/um/monthly/aggTrades/BTCUSDT/BTCUSDT-aggTrades-2026-05.zip": {
     "byte_size": 413059686,
-    "ingested_at": "2026-07-02T09:03:22.153867+00:00",
+    "ingested_at": "2026-07-02T14:14:12.667311+00:00",
     "sha256": "c9c9db1a85d5ec2761b223d71aa6090d2093d4fe3237ec3f9afda02361aa9153",
     "status": "ok"
   },
   "https://data.binance.vision/data/futures/um/monthly/aggTrades/BTCUSDT/BTCUSDT-aggTrades-2026-06.zip": {
     "byte_size": 700931799,
-    "ingested_at": "2026-07-02T09:03:54.795708+00:00",
+    "ingested_at": "2026-07-02T14:14:30.883199+00:00",
     "sha256": "58b52a25577d66c852fb96819e3baa3658f8232b6b44a76e46098768ad1113c4",
     "status": "ok"
   },
@@ -8113,7 +8533,7 @@
   },
   "https://data.binance.vision/data/futures/um/monthly/aggTrades/ETHUSDT/ETHUSDT-aggTrades-2023-05.zip": {
     "byte_size": 308883585,
-    "ingested_at": "2026-07-02T10:07:48.910582+00:00",
+    "ingested_at": "2026-07-02T14:21:07.514075+00:00",
     "sha256": "0a7b6b97ad29f9879fbb9e62c02496e31aa92ad1680e3faec787600b0faa995a",
     "status": "ok"
   },

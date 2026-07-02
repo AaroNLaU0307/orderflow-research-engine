@@ -266,18 +266,42 @@ def backfill_missing_days(
     raw_dir: Path,
     manifest: "Manifest",
 ) -> tuple[pl.DataFrame, list[int]]:
-    """Some monthly aggTrades archives have gaps that the daily archive does
-    not (confirmed empirically for BTCUSDT 2022-08, where a 3-day gap in the
-    monthly file's agg_trade_id sequence corresponds to real trades present
-    in the daily files - a Binance archive-generation quirk, not a genuine
-    trading gap). For each missing day, fetch the daily zip and splice it in.
+    """Some monthly aggTrades archives have gaps (whole-day or partial-day)
+    that the daily archive does not (confirmed empirically for BTCUSDT
+    2022-08, a 3-day whole-day hole, and ETHUSDT 2023-05, a partial-day
+    volume shortfall on several days - Binance archive-generation quirks,
+    not genuine trading gaps). For each such day, fetch the daily zip and
+    REPLACE that day's monthly-sourced trades with it entirely.
+
+    Replace, not merge-and-dedup-by-ID: cross-checking against the daily
+    archive (BTCUSDT 2022-08) found that for at least one partial-gap day
+    (ETHUSDT 2023-05-04) the monthly and daily archives contain the SAME
+    agg_trade_ids but DIFFERENT quantity values (782,735 trades in both,
+    volume 2,618,581 vs 2,639,262) - i.e. Binance revised the trade record
+    between when the two archives were generated. Deduping by ID alone
+    silently keeps whichever copy happens to be listed first, which is not
+    a reliable way to prefer the more authoritative source. The daily
+    archive has matched klines almost exactly in every cross-check in this
+    audit, so it is treated as authoritative for any day being repaired.
 
     Returns (trades_with_backfill, still_missing_days) - the latter is
     non-empty only if the daily archive ALSO lacks that day (logged by the
     caller as a genuine, unrecoverable gap).
     """
     still_missing = []
-    frames = [trades]
+    day_bounds_ms = []
+    for day in missing_days:
+        day_start = dt.datetime(year, month, day, tzinfo=dt.timezone.utc)
+        day_start_ms = int(day_start.timestamp() * 1000)
+        day_end_ms = day_start_ms + 24 * 60 * 60 * 1000
+        day_bounds_ms.append((day_start_ms, day_end_ms))
+    if day_bounds_ms:
+        keep_mask = pl.lit(True)
+        for start_ms, end_ms in day_bounds_ms:
+            keep_mask = keep_mask & ~((pl.col("transact_time") >= start_ms) & (pl.col("transact_time") < end_ms))
+        frames = [trades.filter(keep_mask)]
+    else:
+        frames = [trades]
     for day in missing_days:
         date = dt.date(year, month, day)
         url = day_url("aggTrades", symbol, date)

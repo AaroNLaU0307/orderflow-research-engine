@@ -91,3 +91,36 @@ def test_backfill_dedupes_overlapping_agg_trade_ids(tmp_path, monkeypatch):
     combined, still_missing = etl.backfill_missing_days(monthly_trades, "BTCUSDT", 2024, 1, [1], tmp_path, manifest)
     assert combined.height == 3  # ids 1,2,3 - id=2 not duplicated
     assert sorted(combined["agg_trade_id"].to_list()) == [1, 2, 3]
+
+
+def test_backfill_prefers_daily_quantity_over_monthly_for_same_id(tmp_path, monkeypatch):
+    """Regression test: found empirically on ETHUSDT 2023-05-04, the monthly
+    and daily archives can contain the SAME agg_trade_id with DIFFERENT
+    quantity values (an apparent Binance data revision between when the two
+    archives were generated). Deduping the concatenation by ID alone kept
+    whichever copy was listed first (the monthly/stale one) - silently
+    reintroducing the exact under-count the backfill exists to fix.
+    backfill_missing_days must now drop the target day's monthly rows
+    entirely and trust the daily archive's values for that day, not merge
+    at the trade level.
+    """
+    day1 = dt.datetime(2024, 1, 1, tzinfo=dt.timezone.utc)
+    ts_in_day1 = int(day1.timestamp() * 1000) + 3600_000  # 01:00 UTC on day 1
+
+    # monthly has id=5 with a STALE quantity for the trade at ts_in_day1
+    monthly_trades = _trades([(5, ts_in_day1)])
+    monthly_trades = monthly_trades.with_columns(pl.lit(1.0).alias("quantity"))
+
+    # daily archive has the SAME id=5 but a CORRECTED (larger) quantity
+    daily_trades = _trades([(5, ts_in_day1)])
+    daily_trades = daily_trades.with_columns(pl.lit(9.0).alias("quantity"))
+
+    monkeypatch.setattr(etl, "download_and_verify", lambda *a, **k: Path("fake.zip"))
+    monkeypatch.setattr(etl, "extract_single_csv", lambda *a, **k: Path("fake.csv"))
+    monkeypatch.setattr(etl, "read_aggtrades", lambda path: daily_trades)
+
+    manifest = etl.Manifest.load(tmp_path / "manifest.json")
+    combined, still_missing = etl.backfill_missing_days(monthly_trades, "BTCUSDT", 2024, 1, [1], tmp_path, manifest)
+
+    assert combined.height == 1
+    assert combined["quantity"][0] == 9.0  # daily's corrected value, not monthly's stale 1.0

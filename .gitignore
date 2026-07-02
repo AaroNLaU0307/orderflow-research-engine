@@ -1,0 +1,7 @@
+.venv/
+__pycache__/
+*.pyc
+data/*
+!data/manifest.json
+*.zip
+.pytest_cache/

@@ -129,6 +129,34 @@ def run() -> None:
     )
     lines.append("")
 
+    # ---- Section 2.1: seed invariance + circular-shift placebo (precision amendment) ----
+    lines.append("### 2.1 Seed invariance and circular-shift placebo (precision amendment, supplementary)")
+    lines.append("")
+    event_study_text = (REPORTS_DIR / "event_study_btc.md").read_text(encoding="utf-8")
+    seed_line = next((ln for ln in event_study_text.splitlines() if ln.startswith("**Seed-invariance")), "")
+    lines.append(
+        "The cells above are from the precision-amended primary run (day-cluster bootstrap, "
+        "2,000,000 reps - preregistration/DEVIATIONS.md entry 1, up from the originally pre-registered "
+        "10,000). " + seed_line
+    )
+    lines.append("")
+    lines.append(
+        "Additive, non-gating supplement (preregistration/DEVIATIONS.md entry 2): a circular-shift "
+        "placebo tests event-return *alignment* net of market beta - the failure channel the "
+        "multiplicity-corrected bootstrap alone does not isolate. Does not participate in gates, "
+        "promotion, or BH-FDR. Full methodology and interpretation in reports/event_study_btc.md."
+    )
+    lines.append("")
+    placebo_df = pl.read_csv(REPORTS_DIR / "event_study_btc_placebo_cells.csv")
+    lines.extend(
+        md_table(
+            placebo_df,
+            cols=["signal", "horizon_bars", "observed_mean_bp", "placebo_p", "mean_admitted_fraction"],
+            float_fmt={"observed_mean_bp": "{:.3f}", "placebo_p": "{:.4f}", "mean_admitted_fraction": "{:.4f}"},
+        )
+    )
+    lines.append("")
+
     # ---- Section 3: Phase 4 / OOS / ETH / DSR ----
     lines.append("## 3. Phase 4 backtest, OOS, ETH replication, DSR - all reserved (no promotions)")
     lines.append("")
@@ -147,7 +175,11 @@ def run() -> None:
         "**Deflated Sharpe Ratio:** no promoted strategy exists to deflate. The declared total trial "
         "count is disclosed for transparency regardless: N_trials = 140 = 20 (BTC in-sample cells) + 20 "
         "(BTC out-of-sample cells, would-have-been) + 20 (ETH replication cells, would-have-been) + 80 "
-        "(sensitivity grid cells, section 4) - preregistration section 6.7."
+        "(sensitivity grid cells, section 4) - preregistration section 6.7. The circular-shift placebo "
+        "(section 2.1) is deliberately excluded from this count: DSR's N corrects for selection bias "
+        "across a *search* that could have led to a promotion, and the placebo is a non-gating post-hoc "
+        "diagnostic computed over an already-fixed, already-not-promoted event set - it was never a draw "
+        "from that search."
     )
     lines.append("")
 
@@ -229,9 +261,18 @@ def run() -> None:
         "'does an edge exist' from 'which horizon is traded', eliminating a post-hoc degree of freedom. "
         "Never exercised in this study since no signal reached gate 3.\n"
         "- **Day-cluster bootstrap:** p-values and CIs resample calendar days (not individual events) with "
-        "replacement, 10,000 reps, respecting intraday event clustering and serial dependence. Seeded "
-        "deterministically (orderflow.stats.stable_seed) after a reproducibility bug was found and fixed "
-        "mid-review (Python's hash() on a tuple is randomized per process by default).\n"
+        "replacement, 2,000,000 reps (precision amendment - preregistration/DEVIATIONS.md entry 1; "
+        "originally pre-registered at 10,000), respecting intraday event clustering and serial "
+        "dependence. Seeded deterministically (orderflow.stats.stable_seed) after a reproducibility bug "
+        "was found and fixed mid-review (Python's hash() on a tuple is randomized per process by "
+        "default); the precision amendment additionally verified BH-significance is stable across 3 "
+        "independent seeds (section 2.1). Spearman IC keeps its own lower rep count (10,000, unchanged) "
+        "- informational-only per preregistration section 6.2, never worth the cost of the same "
+        "precision.\n"
+        "- **Circular-shift placebo:** additive, non-gating supplement (preregistration/DEVIATIONS.md "
+        "entry 2, section 2.1) - tests event-return alignment against a null that preserves the entire "
+        "return series (and therefore any unconditional drift/market beta), rather than testing for the "
+        "existence of drift itself.\n"
         "- **Segment purging:** an event is admitted to a segment's statistics only if its longest "
         "horizon's forward window (48 bars) closes entirely within that same segment - per-event, not "
         "per-horizon, so all 5 horizons of a cell always share an identical event set.\n"
@@ -239,7 +280,8 @@ def run() -> None:
         "monthly and daily Binance archives) is excluded from event formation and any forward-return "
         "window overlapping it is nulled - src/orderflow/quarantine.py, applied before dedup so a "
         "quarantined event cannot have suppressed a legitimate nearby one via the 6-bar dedup rule.\n"
-        f"- **DSR trial count:** N=140, declared and enumerated in section 3 above."
+        f"- **DSR trial count:** N=140, declared and enumerated in section 3 above (the placebo's 20 "
+        f"cells are deliberately excluded - see section 3)."
     )
     lines.append("")
 

@@ -346,9 +346,18 @@ def read_fundingrate(path: Path) -> pl.DataFrame:
 
 
 def read_bookdepth(path: Path) -> pl.DataFrame:
-    dtypes = {"timestamp": pl.Utf8, "percentage": pl.Int64, "depth": pl.Float64, "notional": pl.Float64}
+    # percentage is int-valued (-5..-1, 1..5) but some archive eras format it
+    # as a float string ("-5.00" instead of "-5") - read as Float64 and cast,
+    # rather than assuming one format (same defensive-parsing principle as
+    # the header/timestamp-unit sniffing elsewhere in this module).
+    dtypes = {"timestamp": pl.Utf8, "percentage": pl.Float64, "depth": pl.Float64, "notional": pl.Float64}
     df = _read_csv_any_header(path, BOOKDEPTH_COLUMNS, dtypes)
-    df = df.with_columns(pl.col("timestamp").str.strptime(pl.Datetime, "%Y-%m-%d %H:%M:%S").alias("timestamp"))
+    df = df.with_columns(
+        [
+            pl.col("timestamp").str.strptime(pl.Datetime, "%Y-%m-%d %H:%M:%S").alias("timestamp"),
+            pl.col("percentage").round(0).cast(pl.Int64).alias("percentage"),
+        ]
+    )
     return df
 
 

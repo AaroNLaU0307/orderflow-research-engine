@@ -2,6 +2,7 @@ import hashlib
 import json
 from pathlib import Path
 
+import polars as pl
 import pytest
 
 from orderflow import etl
@@ -50,6 +51,22 @@ def test_read_bookdepth():
     bd = etl.read_bookdepth(RECENT / "bookDepth" / "BTCUSDT-bookDepth-2025-03-17.csv")
     assert bd.columns == etl.BOOKDEPTH_COLUMNS
     assert set(bd["percentage"].unique().to_list()) == {-5, -4, -3, -2, -1, 1, 2, 3, 4, 5}
+
+
+def test_read_bookdepth_handles_float_formatted_percentage(tmp_path):
+    """Regression test: some bookDepth archive days format percentage as a
+    float string ("-5.00") instead of an integer string ("-5"), which broke
+    the original Int64-typed read (`could not parse '-5.00' as dtype i64`),
+    found on 157 of 1275 daily BTCUSDT bookDepth files during Phase 2 QA."""
+    csv_path = tmp_path / "float_pct.csv"
+    csv_path.write_text(
+        "timestamp,percentage,depth,notional\n"
+        "2025-03-17 00:00:09,-5.00,5093.46200000,411320144.28810000\n"
+        "2025-03-17 00:00:09,5.00,100.00000000,8000000.00000000\n"
+    )
+    bd = etl.read_bookdepth(csv_path)
+    assert bd["percentage"].to_list() == [-5, 5]
+    assert bd["percentage"].dtype == pl.Int64
 
 
 @pytest.mark.parametrize(

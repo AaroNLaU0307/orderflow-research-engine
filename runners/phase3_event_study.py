@@ -17,7 +17,19 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 import polars as pl  # noqa: E402
 
 from orderflow import events, eventstudy, quarantine, stats  # noqa: E402
-from orderflow.config import BAR_MS, DELTA, FDR_Q, HORIZONS_BARS, MATERIALITY_BP, ROUND_TRIP_BP, WARM_UP_BARS  # noqa: E402
+from orderflow.config import (  # noqa: E402
+    BAR_MS,
+    BOOTSTRAP_REPS,
+    DELTA,
+    FDR_Q,
+    HORIZONS_BARS,
+    IC_BOOTSTRAP_REPS,
+    IS_END_MS,
+    IS_START_MS,
+    MATERIALITY_BP,
+    ROUND_TRIP_BP,
+    WARM_UP_BARS,
+)
 from orderflow.signals import h1, h2, h3, h6  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -26,6 +38,13 @@ REPORTS_DIR = ROOT / "reports"
 
 SYMBOL = "BTCUSDT"
 SIGNALS = ["H1", "H2", "H3", "H6"]
+PLACEBO_K = 10_000
+PLACEBO_MIN_SHIFT = 2016
+# Seed-invariance check (precision amendment, preregistration/DEVIATIONS.md
+# entry 1): re-run the full 20-cell family at 2 more independent seeds and
+# confirm the BH-significant set doesn't change. "BTC-IS" (below) remains the
+# canonical/reported seed label, unchanged from the original study.
+SEED_INVARIANCE_LABELS = ["BTC-IS-seedB", "BTC-IS-seedC"]
 
 
 def log(msg: str) -> None:
@@ -67,6 +86,31 @@ def detect_all_stages(bars: pl.DataFrame, buckets: pl.DataFrame, delta: float, s
     }
 
 
+def compute_cells(
+    is_events: pl.DataFrame, seed_label: str, n_reps: int, ic_n_reps: int
+) -> tuple[dict[tuple[str, int], dict], list[tuple[str, int]]]:
+    """One full pass over the 20-cell family (4 signals x 5 horizons) at a
+    given seed label, including BH-FDR. Factored out so the seed-invariance
+    check can call this 2 more times without duplicating the loop."""
+    cell_lookup: dict[tuple[str, int], dict] = {}
+    p_values = []
+    cell_keys: list[tuple[str, int]] = []
+    for sig in SIGNALS:
+        sig_events = is_events.filter(pl.col("signal") == sig)
+        for h in HORIZONS_BARS:
+            stats_dict = eventstudy.cell_stats(
+                sig_events, h, n_reps=n_reps, ic_n_reps=ic_n_reps, seed=stats.stable_seed(seed_label, sig, h)
+            )
+            cell_lookup[(sig, h)] = stats_dict
+            p_values.append(stats_dict.get("p_value", float("nan")))
+            cell_keys.append((sig, h))
+
+    bh_sig = stats.bh_fdr(p_values, q=FDR_Q)
+    for (sig, h), significant in zip(cell_keys, bh_sig):
+        cell_lookup[(sig, h)]["bh_significant"] = significant
+    return cell_lookup, cell_keys
+
+
 def run() -> None:
     log(f"Loading {SYMBOL} bars/buckets...")
     bars = pl.read_parquet(PARQUET_DIR / SYMBOL / "bars.parquet")
@@ -98,24 +142,39 @@ def run() -> None:
     is_events = all_events.filter((pl.col("segment") == "IS") & pl.col("purge_ok"))
     log(f"  {is_events.height:,} BTC in-sample events survive purging")
 
-    # 20-cell family: 4 signals x 5 horizons, BTC IS only
+    # 20-cell family: 4 signals x 5 horizons, BTC IS only. Precision
+    # amendment: BOOTSTRAP_REPS = 2,000,000 (was 10,000 at prereg sign-off;
+    # preregistration/DEVIATIONS.md entry 1). Spearman IC keeps its own lower
+    # rep count (IC_BOOTSTRAP_REPS) - informational-only, never gating, and
+    # its bootstrap is an unvectorized per-rep loop unlike the mean bootstrap.
+    log(f"Computing 20-cell family at {BOOTSTRAP_REPS:,} reps (primary seed 'BTC-IS')...")
+    cell_lookup, cell_keys = compute_cells(is_events, "BTC-IS", BOOTSTRAP_REPS, IC_BOOTSTRAP_REPS)
+    for sig, h in cell_keys:
+        c = cell_lookup[(sig, h)]
+        log(f"  {sig} h={h}: n={c['n_events']}, mean={c.get('observed_mean', float('nan')):.6f}, p={c.get('p_value', float('nan')):.4f}, bh_sig={c.get('bh_significant')}")
+
+    # Seed-invariance check (precision amendment): re-run the full family at
+    # 2 more independent seeds and confirm the BH-significant set (which
+    # (signal, horizon) pairs are True) doesn't change. Exact p-values/CIs
+    # will differ slightly rep-to-rep (bootstrap Monte Carlo noise) - only
+    # the qualitative significant/not-significant classification is checked.
+    log("Seed-invariance check: re-running the full family at 2 additional seeds...")
+    primary_sig_set = {k for k in cell_keys if cell_lookup[k].get("bh_significant")}
+    seed_invariance = []
+    for alt_label in SEED_INVARIANCE_LABELS:
+        alt_lookup, alt_keys = compute_cells(is_events, alt_label, BOOTSTRAP_REPS, IC_BOOTSTRAP_REPS)
+        alt_sig_set = {k for k in alt_keys if alt_lookup[k].get("bh_significant")}
+        matches = alt_sig_set == primary_sig_set
+        seed_invariance.append(
+            {
+                "seed_label": alt_label,
+                "bh_significant_set": ", ".join(f"{s}/h{h}" for s, h in sorted(alt_sig_set)) or "(none)",
+                "matches_primary": matches,
+            }
+        )
+        log(f"  {alt_label}: bh_significant_set={sorted(alt_sig_set)} matches_primary={matches}")
+
     cell_records = []
-    cell_lookup: dict[tuple[str, int], dict] = {}
-    p_values = []
-    cell_keys = []
-    for sig in SIGNALS:
-        sig_events = is_events.filter(pl.col("signal") == sig)
-        for h in HORIZONS_BARS:
-            stats_dict = eventstudy.cell_stats(sig_events, h, n_reps=10_000, seed=stats.stable_seed("BTC-IS", sig, h))
-            cell_lookup[(sig, h)] = stats_dict
-            p_values.append(stats_dict.get("p_value", float("nan")))
-            cell_keys.append((sig, h))
-            log(f"  {sig} h={h}: n={stats_dict['n_events']}, mean={stats_dict.get('observed_mean', float('nan')):.6f}, p={stats_dict.get('p_value', float('nan')):.4f}")
-
-    bh_sig = stats.bh_fdr(p_values, q=FDR_Q)
-    for (sig, h), significant in zip(cell_keys, bh_sig):
-        cell_lookup[(sig, h)]["bh_significant"] = significant
-
     for (sig, h), c in cell_lookup.items():
         mean = c.get("observed_mean")
         ci_lo, ci_hi = c.get("ci95_lo"), c.get("ci95_hi")
@@ -173,12 +232,68 @@ def run() -> None:
     gates_df.write_csv(REPORTS_DIR / "event_study_btc_gates.csv")
     log(f"Wrote {REPORTS_DIR / 'event_study_btc_gates.csv'}")
 
-    write_markdown_report(cells_df, gates_df, promoted_signals, is_events, funnel)
+    # Circular-shift placebo (supplementary, non-gating - preregistration/
+    # DEVIATIONS.md entry 2). bar_index 0 coincides with IS_START, so the IS
+    # segment of `bars` is exactly the contiguous bar_index range [0,
+    # n_is_bars) - asserted below rather than assumed, since the whole
+    # wrap-within-IS design depends on it.
+    log(f"Circular-shift placebo: K={PLACEBO_K:,} shifts per signal...")
+    is_bars = bars.filter((pl.col("bar_ts").dt.epoch(time_unit="ms") >= IS_START_MS) & (pl.col("bar_ts").dt.epoch(time_unit="ms") <= IS_END_MS)).sort("bar_index")
+    n_is_bars = is_bars.height
+    assert is_bars["bar_index"].to_list() == list(range(n_is_bars)), "IS segment is not a contiguous bar_index range starting at 0 - circular-shift placebo assumption violated"
+    is_open = is_bars["open"].to_numpy()
+    is_bar_ts_ms = is_bars["bar_ts"].dt.epoch(time_unit="ms").to_numpy()
+    qwindows_symbol = qwindows.get(SYMBOL, [])
+
+    placebo_records = []
+    for sig in SIGNALS:
+        sig_is_events = is_events.filter(pl.col("signal") == sig)
+        observed_means = {h: cell_lookup[(sig, h)]["observed_mean"] for h in HORIZONS_BARS}
+        placebo = stats.circular_shift_placebo(
+            bar_index=sig_is_events["bar_index"].to_numpy(),
+            direction=sig_is_events["direction"].to_numpy(),
+            observed_means=observed_means,
+            is_open=is_open,
+            is_bar_ts_ms=is_bar_ts_ms,
+            n_is_bars=n_is_bars,
+            warm_up_bars=WARM_UP_BARS,
+            horizons=HORIZONS_BARS,
+            quarantine_windows=qwindows_symbol,
+            bar_ms=BAR_MS,
+            k=PLACEBO_K,
+            seed=stats.stable_seed("placebo", "BTC-IS", sig),
+            min_shift=PLACEBO_MIN_SHIFT,
+        )
+        for h in HORIZONS_BARS:
+            p = placebo[h]
+            placebo_records.append(
+                {
+                    "signal": sig,
+                    "horizon_bars": h,
+                    "observed_mean_bp": observed_means[h] * 10_000,
+                    "placebo_p": p["placebo_p"],
+                    "n_shifts_valid": p["n_shifts"],
+                    "mean_admitted_fraction": p["mean_admitted_fraction"],
+                }
+            )
+        log(f"  {sig}: mean_admitted_fraction={placebo[HORIZONS_BARS[0]]['mean_admitted_fraction']:.4f}")
+
+    placebo_df = pl.DataFrame(placebo_records).sort(["signal", "horizon_bars"])
+    placebo_df.write_csv(REPORTS_DIR / "event_study_btc_placebo_cells.csv")
+    log(f"Wrote {REPORTS_DIR / 'event_study_btc_placebo_cells.csv'}")
+
+    write_markdown_report(cells_df, gates_df, promoted_signals, is_events, funnel, seed_invariance, placebo_df)
     log("Phase 3 event study complete.")
 
 
 def write_markdown_report(
-    cells_df: pl.DataFrame, gates_df: pl.DataFrame, promoted_signals: dict, is_events: pl.DataFrame, funnel: dict
+    cells_df: pl.DataFrame,
+    gates_df: pl.DataFrame,
+    promoted_signals: dict,
+    is_events: pl.DataFrame,
+    funnel: dict,
+    seed_invariance: list[dict],
+    placebo_df: pl.DataFrame,
 ) -> None:
     lines = []
     lines.append("# Event Study - BTCUSDT In-Sample")
@@ -187,6 +302,11 @@ def write_markdown_report(
     lines.append("")
     lines.append(f"20-cell family (4 signals x 5 horizons), BH-FDR q={FDR_Q}. ")
     lines.append(f"Cost model: round trip ~= {ROUND_TRIP_BP}bp; materiality gate requires mean gross return >= {MATERIALITY_BP}bp.")
+    lines.append(
+        f"Day-cluster bootstrap: {BOOTSTRAP_REPS:,} reps (precision amendment - preregistration/DEVIATIONS.md "
+        f"entry 1; was 10,000 at prereg sign-off). Spearman IC: {IC_BOOTSTRAP_REPS:,} reps (unchanged, "
+        f"informational-only per preregistration section 6.2)."
+    )
     lines.append("")
     lines.append("## Event accounting")
     lines.append("")
@@ -240,6 +360,67 @@ def write_markdown_report(
         lines.append(
             f"| {row['signal']} | {row['horizon_bars']} | {row['n_events']} | {row['observed_mean_bp']:.3f} | {se} | {t} | "
             f"{row['p_value']:.4f} | {row['bh_significant_q10']} | {ci} | {ic} |"
+        )
+    lines.append("")
+    lines.append("## Seed invariance (precision amendment)")
+    lines.append("")
+    primary_sig_pairs = sorted(
+        (r["signal"], r["horizon_bars"]) for r in cells_df.filter(pl.col("bh_significant_q10")).iter_rows(named=True)
+    )
+    primary_sig_str = ", ".join(f"{s}/h{h}" for s, h in primary_sig_pairs) or "(none)"
+    lines.append(
+        f"The 20-cell family above was computed at seed label 'BTC-IS' (canonical/reported). To confirm "
+        f"the BH-FDR-significant set is not an artifact of Monte Carlo noise at this rep count, the full "
+        f"family was re-computed at {BOOTSTRAP_REPS:,} reps under 2 further independent seed labels. "
+        f"Primary BH-significant set: {primary_sig_str}."
+    )
+    lines.append("")
+    lines.append("| Seed label | BH-significant set | Matches primary |")
+    lines.append("|---|---|---|")
+    for row in seed_invariance:
+        lines.append(f"| {row['seed_label']} | {row['bh_significant_set']} | {row['matches_primary']} |")
+    lines.append("")
+    all_match = all(row["matches_primary"] for row in seed_invariance)
+    lines.append(
+        f"**Seed-invariance {'HOLDS' if all_match else 'FAILS'}**: the BH-significant set is "
+        f"{'identical' if all_match else 'NOT identical'} across all 3 seeds. "
+        + (
+            "This is expected at 2,000,000 reps for a result this far from the FDR boundary in either "
+            "direction; it does not by itself mean p-values/CIs are bit-identical across seeds (they are "
+            "not - that would indicate a seeding bug, not precision), only that the qualitative "
+            "significant/not-significant call for every cell is stable."
+            if all_match
+            else "This would indicate the BH-FDR outcome for at least one cell is still Monte Carlo-sensitive "
+            "even at 2,000,000 reps and should be investigated before being treated as settled."
+        )
+    )
+    lines.append("")
+    lines.append("## Circular-shift placebo (supplementary, non-gating)")
+    lines.append("")
+    lines.append(
+        "Additive supplement per preregistration/DEVIATIONS.md entry 2 - does **not** participate in "
+        "gates, promotion, or BH-FDR, which remain frozen on the day-cluster bootstrap table above. "
+        f"For each signal's deduplicated BTC in-sample event set, K={PLACEBO_K:,} circular shifts were "
+        f"drawn (one random offset per shift, applied to all of that signal's event bar-indices "
+        f"simultaneously, wrapping within the IS bar range; offset uniform over "
+        f"{{{PLACEBO_MIN_SHIFT}, ..., N_IS_bars-{PLACEBO_MIN_SHIFT}}} to forbid near-identity alignment). "
+        "Shifted events landing in warm-up or a quarantine window are dropped for that replicate (same "
+        "hygiene as reality); a shifted event's longest-horizon window decides admission once, shared "
+        "across all horizons, exactly mirroring the real segment-purge rule. Placebo p (two-sided) = "
+        "fraction of shifts whose |mean signed forward return| >= |observed|. Rationale: circular "
+        "shifting preserves the entire return series, so unconditional drift sits inside the null - this "
+        "tests event-return *alignment* net of market beta, the failure channel (bull-market beta "
+        "masquerading as signal) the multiplicity-corrected bootstrap alone does not isolate. If placebo "
+        "and bootstrap disagree anywhere, the disagreement is reported verbatim below, not reconciled or "
+        "re-run."
+    )
+    lines.append("")
+    lines.append("| Signal | Horizon (bars) | Observed mean (bp) | Placebo p | Mean admitted fraction |")
+    lines.append("|---|---|---|---|---|")
+    for row in placebo_df.iter_rows(named=True):
+        lines.append(
+            f"| {row['signal']} | {row['horizon_bars']} | {row['observed_mean_bp']:.3f} | "
+            f"{row['placebo_p']:.4f} | {row['mean_admitted_fraction']:.4f} |"
         )
     lines.append("")
     lines.append("## Promotion gates")

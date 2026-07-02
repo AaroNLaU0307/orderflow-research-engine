@@ -85,6 +85,13 @@ MIN_EVENTS = 300
 # section 6.3
 FDR_Q = 0.10
 
-BOOTSTRAP_REPS = 10_000
+# Precision amendment (preregistration/DEVIATIONS.md entry 1): raised from the
+# originally pre-registered 10,000 to reduce Monte Carlo error in the p-values/
+# CIs driving BH-FDR; same day-cluster bootstrap method, seed-invariance
+# verified across 3 seeds. Spearman IC (informational-only, never gating)
+# intentionally stays at its own lower rep count - see eventstudy.cell_stats's
+# ic_n_reps parameter.
+BOOTSTRAP_REPS = 2_000_000
+IC_BOOTSTRAP_REPS = 10_000
 
 SYMBOLS = ["BTCUSDT", "ETHUSDT"]

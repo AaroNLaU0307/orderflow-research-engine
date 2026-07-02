@@ -111,10 +111,20 @@ def event_day_bucket(bar_ts_series: pl.Series) -> np.ndarray:
     return (ms // 86_400_000).astype(np.int64)  # whole UTC calendar days since epoch
 
 
-def cell_stats(events: pl.DataFrame, horizon: int, n_reps: int = 10_000, seed: int | None = None) -> dict:
+def cell_stats(
+    events: pl.DataFrame, horizon: int, n_reps: int = 10_000, seed: int | None = None, ic_n_reps: int | None = None
+) -> dict:
     """Event-study statistics for one (signal, horizon) cell: mean signed
     return, day-cluster bootstrap p-value + CI, Spearman IC + CI. `events`
     must already be filtered to the relevant signal + purge_ok + segment.
+
+    `ic_n_reps` (defaults to `n_reps` if not given) lets the Spearman IC
+    bootstrap use a different rep count than the primary mean-return
+    bootstrap: `day_cluster_bootstrap_spearman` is an unvectorized per-rep
+    Python loop (unlike the mean bootstrap, which is fully vectorized), so
+    running it at the same high precision as the gating statistic would be
+    needlessly slow for a value that preregistration section 6.2 states is
+    "informational only - never a gating criterion".
     """
     col = f"r_{horizon}"
     sub = events.filter(pl.col(col).is_not_null())
@@ -123,7 +133,7 @@ def cell_stats(events: pl.DataFrame, horizon: int, n_reps: int = 10_000, seed: i
     returns = sub[col].to_numpy()
     days = event_day_bucket(sub["bar_ts"])
     boot = stats.day_cluster_bootstrap_mean(returns, days, n_reps=n_reps, seed=seed)
-    ic = stats.day_cluster_bootstrap_spearman(sub["magnitude"].to_numpy(), returns, days, n_reps=n_reps, seed=seed)
+    ic = stats.day_cluster_bootstrap_spearman(sub["magnitude"].to_numpy(), returns, days, n_reps=ic_n_reps or n_reps, seed=seed)
     return {
         "n_events": sub.height,
         "observed_mean": boot["observed_mean"],

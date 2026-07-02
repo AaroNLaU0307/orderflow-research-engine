@@ -149,6 +149,41 @@ def test_year_consistency_two_of_three_positive():
     assert result["segment_signs"]["2024"] == -1
 
 
+def _cell_stats_fixture(n=80):
+    rng = np.random.default_rng(0)
+    rows = []
+    for i in range(n):
+        bar_ts = dt.datetime(2023, 6, 1, tzinfo=UTC) + dt.timedelta(minutes=5 * i)
+        rows.append((i, bar_ts, "H1", 1, float(rng.uniform(0, 5))))
+    events = pl.DataFrame(rows, schema=["bar_index", "bar_ts", "signal", "direction", "magnitude"], orient="row").with_columns(
+        pl.col("direction").cast(pl.Int8)
+    )
+    r = rng.normal(0.001, 0.01, n)
+    return events.with_columns(pl.Series("r_6", r))
+
+
+def test_cell_stats_ic_n_reps_defaults_to_n_reps():
+    """cell_stats(..., ic_n_reps=None) must behave identically to passing
+    ic_n_reps=n_reps explicitly - the decoupling is opt-in, not a behavior
+    change for existing call sites that don't pass it."""
+    events = _cell_stats_fixture()
+    a = eventstudy.cell_stats(events, 6, n_reps=500, seed=42)
+    b = eventstudy.cell_stats(events, 6, n_reps=500, ic_n_reps=500, seed=42)
+    assert a["spearman_ic"] == b["spearman_ic"]
+    assert a["p_value"] == b["p_value"]
+    assert a["ci95_lo"] == b["ci95_lo"] and a["ci95_hi"] == b["ci95_hi"]
+
+
+def test_cell_stats_ic_n_reps_independent_of_n_reps():
+    """The precision amendment raises n_reps (mean bootstrap) to 2,000,000
+    while intentionally leaving the Spearman IC bootstrap at a much lower
+    rep count - must not error and must still return a sane IC."""
+    events = _cell_stats_fixture()
+    result = eventstudy.cell_stats(events, 6, n_reps=50_000, ic_n_reps=200, seed=42)
+    assert result["n_events"] == events.height
+    assert -1.0 <= result["spearman_ic"] <= 1.0
+
+
 def test_promotion_decision_all_gates_pass():
     signal_cells = {
         6: {"n_events": 400, "bh_significant": True, "observed_mean": 0.003, "ci95_lo": 0.001, "ci95_hi": 0.005},

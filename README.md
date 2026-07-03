@@ -5,6 +5,12 @@ order-flow footprint signals contain exploitable information in Binance
 BTCUSDT perpetual futures, under a falsification-first, pre-registered
 protocol. This is not a trading bot and ships no live strategy.
 
+> **Question:** do six classic order-flow signals carry exploitable information in BTC perps?
+> **Data:** 48 months Binance BTCUSDT+ETHUSDT perp aggTrades, ~54GB, checksum-verified, QA'd.
+> **Method:** pre-registered falsification protocol - 20-cell family, BH-FDR q=0.10, day-cluster bootstrap at 2,000,000 reps, economic materiality gate at 1.5x costs.
+> **Result:** 0/20 significant; 2 signals data-blocked (disclosed); zero promotions; OOS never opened.
+> **Why it matters:** a certified negative at institutional rigor - the pipeline that produces it is the deliverable.
+
 ## Result
 
 ![Fig 1: all 20 primary cells - mean gross return with 95% CI](reports/figures/fig1_forest_20cells.png)
@@ -98,6 +104,40 @@ data - not a re-run of this one with adjusted thresholds. No gate, window,
 or threshold in this repository should be read as a candidate for
 loosening; see [`ROADMAP.md`](ROADMAP.md) for what legitimate next steps
 look like (new hypotheses, new data, not relaxed rules).
+
+## Scope and limitations
+
+**What a null here does and does not falsify.** The operationalizations
+tested are the retail-accessible, footprint-chart versions of these
+concepts - 5-minute bars built from trades-derived footprints, horizons
+of 5 minutes to 4 hours, taker-side execution economics. Order flow as
+monetized by market-making and latency-sensitive firms is a different
+object: sub-second horizons, full-book state (queue position,
+replenishment, cancellations), maker economics - requiring exactly the
+L2 history that is data-blocked for this study. A null at this study's
+scale falsifies the footprint-lore versions at retail-accessible
+timescales and costs; it does not falsify, and cannot speak to,
+microstructure alpha at the tick scale. The v1.5 collector (in-repo)
+exists to make that layer testable in the future.
+
+- **Single-instrument discovery, single-venue prints.** BTCUSDT perp on
+  Binance only; no cross-venue consolidated tape. ETH ingested but
+  reserved for promotion-gated replication that never triggered.
+- **H2 is a proxy.** Absorption was tested via its trades-footprint
+  operationalization (high opposing volume at a level, price refusal);
+  the stricter book-refill definition (resting liquidity replenishing
+  while hit) needs L2 and partially inherits the H4/H5 data block.
+- **One operationalization per concept.** Each fuzzy practitioner
+  concept was frozen into a single pre-registered definition (plus
+  scaled variants in the sensitivity grid). Other operationalizations
+  remain untested; any future variant requires its own pre-registered
+  study, not a post-hoc redefinition here.
+- **Execution model.** Taker both sides. Maker entry would roughly halve
+  fees but introduces fill/adverse-selection risk not modeled; no claim
+  is made in either direction.
+- **Regime composition.** The IS window (2022H2-2024) has its own regime
+  mix; the year-consistency gate mitigates but does not eliminate regime
+  dependence.
 
 ## Rigor coverage matrix
 

@@ -7,6 +7,9 @@ protocol. This is not a trading bot and ships no live strategy.
 
 ## Result
 
+![Fig 1: all 20 primary cells - mean gross return with 95% CI](reports/figures/fig1_forest_20cells.png)
+*Fig 1 - all 20 BTC in-sample cells (4 signals x 5 horizons), mean signed gross return with 95% CI against the round-trip cost floor and economic materiality bar. No cell is BH-FDR significant; H3's wide CIs are what underpowered looks like, not an axis-scaling artifact.*
+
 Six classic order-flow signals were in scope. Two - **H4 (liquidity
 wall)** and **H5 (liquidity pull)** - are **DATA-BLOCKED** for the entire
 study: the official Binance historical archive carries no full-depth L2
@@ -25,6 +28,9 @@ signals x 5 horizons), Benjamini-Hochberg FDR at q=0.10.
 promoted.** H3 (62 in-sample events) and H6 (286 events) additionally
 failed the minimum-event-count gate (>=300) at the pre-registered
 convention parameters - underpowered, not merely null.
+
+![Fig 2: BH-FDR step-up plot](reports/figures/fig2_bh_step.png)
+*Fig 2 - Benjamini-Hochberg step-up procedure, 20-cell family. No point falls on or below the threshold line; the two nearest misses (H1 at 30m and 1h) are seed-invariant across 3 independent seeds at 2,000,000 reps.*
 
 The most statistically credible cell in the entire table - the
 highest-mean cell among those clearing raw p<0.05, before any FDR
@@ -60,6 +66,9 @@ would predict at this scale, and none of the pattern is consistent
 across configs. See `reports/sensitivity_grid.md` for the full tables
 and the mandatory interpretation preamble governing how (and how not) to
 read them.
+
+![Fig 3: sensitivity heatmap](reports/figures/fig3_sensitivity_heatmap.png)
+*Fig 3 - t-statistic across the primary convention + 4 sensitivity configs, all 20 cells. 8/80 sensitivity cells cross |t|>1.96 vs ~4 expected by chance; the only cross-config recurrence (H1 under Delta=10/Delta=50) is mechanical duplication of the same Delta-independent event set.*
 
 A **circular-shift placebo** (non-gating, K=10,000 shifts per signal -
 see the Rigor coverage matrix below) mostly agrees with the day-cluster
@@ -115,6 +124,9 @@ N/A rather than skipped.
 
 ## Methodology
 
+![Fig 4: signal detection examples](reports/figures/fig4_signal_examples.png)
+*Fig 4 - one 7-day BTC in-sample window with at least one detection of every signal (H1/H2/H3/H6), markers only, no forward returns shown - the window choice cannot cherry-pick outcomes (deterministic rule: earliest such window; see `runners/phase5_figures.py`).*
+
 **Pre-registration before PnL.** Every hypothesis, event definition,
 parameter, horizon, statistical gate, and cost assumption is frozen in
 [`preregistration/PREREGISTRATION.md`](preregistration/PREREGISTRATION.md),
@@ -153,15 +165,18 @@ this family - standard discovery-vs-confirmation separation, moot here
 since discovery produced no promotions.
 
 **Day-cluster bootstrap.** Every p-value and confidence interval resamples
-*calendar days* (not individual events) with replacement, 10,000
-repetitions, respecting intraday event clustering and serial dependence -
-the concrete implementation of a stationary block bootstrap. The
-resampling is seeded deterministically
+*calendar days* (not individual events) with replacement, 2,000,000
+repetitions (precision amendment - `preregistration/DEVIATIONS.md` entry
+1; originally pre-registered at 10,000), respecting intraday event
+clustering and serial dependence - the concrete implementation of a
+stationary block bootstrap. The resampling is seeded deterministically
 (`orderflow.stats.stable_seed`, a `zlib.crc32`-based seed) after a real
 reproducibility bug was found mid-review: Python's built-in `hash()` on a
 tuple is randomized per process by default, so an earlier version of this
 pipeline silently produced different p-values on every run from identical
-data. Two full runs now produce byte-identical output.
+data. Two full runs now produce byte-identical output; BH-significance is
+additionally verified seed-invariant across 3 independent seeds at the
+amended rep count.
 
 **Segment purging.** An event is admitted into a segment's (IS or OOS)
 statistics only if its *longest* tested horizon's forward window closes
@@ -263,12 +278,12 @@ orderflow-research-engine/
 ├── docs/BRIEF.md               # verbatim original project brief
 ├── preregistration/
 │   ├── PREREGISTRATION.md      # frozen spec, signed off before any PnL
-│   └── DEVIATIONS.md           # empty - no post-approval changes occurred
-├── src/orderflow/               # etl, footprint, signals/h1-h6, eventstudy, stats, costs, quarantine
+│   └── DEVIATIONS.md           # 2 entries: precision amendment, placebo supplement
+├── src/orderflow/               # etl, footprint, signals/h1-h6, eventstudy, stats, costs, quarantine, figures
 ├── collector/depth_recorder.py # v1.5 L2 recorder (see ROADMAP.md)
 ├── runners/                    # phase runners; each emits reports/ artifacts
-├── tests/                      # 90+ tests: unit, truncation-invariance, integration
-├── reports/                    # runner-generated, immutable
+├── tests/                      # 104 tests: unit, truncation-invariance, integration, figure smoke tests
+├── reports/                    # runner-generated, immutable (includes reports/figures/)
 └── data/                       # gitignored except manifest.json
 ```
 
@@ -277,7 +292,7 @@ orderflow-research-engine/
 ```
 python -m venv .venv && .venv/Scripts/activate  # or source .venv/bin/activate
 pip install -r requirements.txt
-pytest tests/                                    # should show 90 passed
+pytest tests/                                    # should show 104 passed
 python runners/phase2_etl.py                     # full 48-month, 2-symbol ingest (~1hr, ~54GB download)
 python runners/phase2_qa.py                      # QA gate
 python runners/phase3_event_study.py             # the 20-cell BTC in-sample study
@@ -285,6 +300,7 @@ python runners/phase3_sensitivity_stage.py       # Delta=10 / bar=3m re-staging
 python runners/phase3_sensitivity_derive.py      # Delta=50 / bar=15m derivation
 python runners/phase3_sensitivity_run.py         # the 80-cell sensitivity grid
 python runners/phase5_final_report.py            # assembles reports/FINAL_REPORT.md
+python runners/phase5_figures.py                 # renders reports/figures/*.png for this README
 ```
 
 Every `runners/phase*.py` script is independently re-runnable and

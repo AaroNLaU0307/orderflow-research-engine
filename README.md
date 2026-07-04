@@ -151,10 +151,10 @@ N/A rather than skipped.
 | Permutation / placebo | **Done:** circular-shift placebo, a drift-absorbing null that tests event-return *alignment* net of market beta rather than the existence of drift itself - the one failure channel (bull-market beta masquerading as signal) the bootstrap alone doesn't isolate. Additive, non-gating supplement - [`preregistration/DEVIATIONS.md`](preregistration/DEVIATIONS.md) entry 2, [`reports/event_study_btc.md`](reports/event_study_btc.md) (Circular-shift placebo section). |
 | Monte Carlo PnL reshuffling | **N/A - no promoted strategy exists to reshuffle.** The pre-registered spec (stationary block bootstrap on daily PnL, block length 5 days, 10,000 reps) is fully written for any future promoted strategy - [`preregistration/PREREGISTRATION.md`](preregistration/PREREGISTRATION.md) section 7. |
 | Walk-forward re-optimization | **N/A by design, not by omission.** Zero fitted parameters exist in this study - every detector threshold is a fixed convention value, never fit to data - so the failure mode walk-forward re-optimization guards against (parameter overfitting) is precluded structurally. A purge (= h\*'s bar length) + 1-day embargo walk-forward evaluation is pre-specified for any promoted strategy's OOS confirmation - [`preregistration/PREREGISTRATION.md`](preregistration/PREREGISTRATION.md) section 7. |
-| Parameter robustness grid | **Done:** 80-cell one-factor-at-a-time sensitivity grid (Δ=10, Δ=50, bar=3m, bar=15m) - plateau-of-the-null evidence, 8 of 80 cells cross \|t\|>1.96 against a ~4-cell chance expectation. [`reports/sensitivity_grid.md`](reports/sensitivity_grid.md). |
+| Parameter robustness grid | **Done:** 80-cell one-factor-at-a-time sensitivity grid (Delta=10, Delta=50, bar=3m, bar=15m) - plateau-of-the-null evidence, 8 of 80 cells cross \|t\|>1.96 against a ~4-cell chance expectation. [`reports/sensitivity_grid.md`](reports/sensitivity_grid.md). |
 | Cost stress escalation | **Inverted case, structurally moot rather than separately tested:** BH-FDR significance in the Cells table is computed on gross (pre-cost) forward returns - costs enter only through the separate materiality gate (gate 3), never the significance test itself. The 0/20 BH-FDR outcome is therefore identical at any round-trip cost assumption, including zero; it is not a byproduct of the ~12bp cost estimate being too pessimistic. [`reports/event_study_btc.md`](reports/event_study_btc.md), [`preregistration/PREREGISTRATION.md`](preregistration/PREREGISTRATION.md) section 6.6. |
 | Crisis / regime stress | **Covered by design, not a bolt-on test:** the sample spans the 2022 LUNA/FTX collapses, 2023 banking stress, and the 2024-08 carry-unwind crash; the pre-registered year-consistency gate (gate 4) is the regime-stability check, and [`reports/event_counts_by_half_year.md`](reports/event_counts_by_half_year.md) documents the calendar distribution of events across those regimes. No promoted strategy exists, so there is no strategy-level crash-PnL to report. |
-| Noise injection | **Not informative for a null result** (noise can destroy real structure, it cannot manufacture a signal that survives BH-FDR) - not run for that reason, not omitted by oversight. The dominant footprint-specific noise channel, bucket-boundary placement, is already covered by the Δ=10/Δ=50 sensitivity configs. [`reports/sensitivity_grid.md`](reports/sensitivity_grid.md). |
+| Noise injection | **Not informative for a null result** (noise can destroy real structure, it cannot manufacture a signal that survives BH-FDR) - not run for that reason, not omitted by oversight. The dominant footprint-specific noise channel, bucket-boundary placement, is already covered by the Delta=10/Delta=50 sensitivity configs. [`reports/sensitivity_grid.md`](reports/sensitivity_grid.md). |
 | Cross-timeframe | **Done:** 3-minute and 15-minute bar configs, both report-only sensitivity, both consistent with the primary null. [`reports/sensitivity_grid.md`](reports/sensitivity_grid.md). |
 | Cross-instrument | **Deliberately withheld, not skipped:** ETH replication is promotion-gated by the prereg - running it on signals that never cleared BTC discovery would spend the one reserved confirmation universe for zero confirmatory value. The ETH bar store exists and passed the identical Phase 2 QA gate as BTC. [`preregistration/PREREGISTRATION.md`](preregistration/PREREGISTRATION.md) section 7, [`reports/QA_SUMMARY.md`](reports/QA_SUMMARY.md). |
 | Blind hold-out | **Held in the strictest state achievable:** the 18-month OOS segment (2025-01-01 to 2026-06-30) is locked, single-use, and was never opened by any event-return computation - not descriptively, not for completeness - because nothing earned access. [`reports/FINAL_REPORT.md`](reports/FINAL_REPORT.md) section 3. |
@@ -313,18 +313,18 @@ and rounds/casts), with a regression test.
 
 ```
 orderflow-research-engine/
-├── README.md                  # this file
-├── ROADMAP.md
-├── docs/BRIEF.md               # verbatim original project brief
-├── preregistration/
-│   ├── PREREGISTRATION.md      # frozen spec, signed off before any PnL
-│   └── DEVIATIONS.md           # 2 entries: precision amendment, placebo supplement
-├── src/orderflow/               # etl, footprint, signals/h1-h6, eventstudy, stats, costs, quarantine, figures
-├── collector/depth_recorder.py # v1.5 L2 recorder (see ROADMAP.md)
-├── runners/                    # phase runners; each emits reports/ artifacts
-├── tests/                      # 104 tests: unit, truncation-invariance, integration, figure smoke tests
-├── reports/                    # runner-generated, immutable (includes reports/figures/)
-└── data/                       # gitignored except manifest.json
+|-- README.md                  # this file
+|-- ROADMAP.md
+|-- docs/BRIEF.md               # verbatim original project brief
+|-- preregistration/
+|   |-- PREREGISTRATION.md      # frozen spec, signed off before any PnL
+|   `-- DEVIATIONS.md           # 2 entries: precision amendment, placebo supplement
+|-- src/orderflow/               # etl, footprint, signals/h1-h6, eventstudy, stats, costs, quarantine, figures
+|-- collector/depth_recorder.py # v1.5 L2 recorder (see ROADMAP.md)
+|-- runners/                    # phase runners; each emits reports/ artifacts
+|-- tests/                      # 104 tests: unit, truncation-invariance, integration, figure smoke tests
+|-- reports/                    # runner-generated, immutable (includes reports/figures/)
+`-- data/                       # gitignored except manifest.json
 ```
 
 ## Reproducing this study
@@ -346,3 +346,13 @@ python runners/phase5_figures.py                 # renders reports/figures/*.png
 Every `runners/phase*.py` script is independently re-runnable and
 regenerates its `reports/*.md` / `reports/*.csv` output deterministically
 from the same input data.
+
+## Related research
+
+Part of a systematic research series applying the same falsification-first
+protocol across asset classes and strategy families:
+
+- [`multi-asset-tsmom-research`](https://github.com/AaroNLaU0307/multi-asset-tsmom-research) - time-series momentum across asset classes, **confirmed** (net Sharpe ~0.70-0.75, bootstrap CI excludes zero); XSMOM and four overlay studies falsified under the same gates.
+- [`quant-backtest-framework`](https://github.com/AaroNLaU0307/quant-backtest-framework) - multi-instrument SMC/ICT price-action study, **falsified** (0/16 cells, DSR ~ 0).
+
+The series' base rate is the point: confirmations are earned against the same gates that falsify everything else.

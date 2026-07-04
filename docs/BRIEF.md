@@ -1,3 +1,5 @@
+Original project brief, agent-executed under human-gated review at every phase; see the commit history for the review cadence.
+
 # Order Flow Research Engine v1 — BTCUSDT Perpetual Futures
 You are building a confirmatory quantitative research project, not a trading bot. The deliverable is a GitHub-ready research repository (`orderflow-research-engine`) that tests whether classic order-flow signals contain exploitable information in Binance BTCUSDT perpetual futures, under a falsification-first protocol. A clean negative result is a fully acceptable — and publishable — outcome. Do not optimize toward positive results.
 ---

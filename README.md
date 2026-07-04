@@ -1,5 +1,7 @@
 # Order Flow Research Engine v1
 
+[![tests](https://github.com/AaroNLaU0307/orderflow-research-engine/actions/workflows/tests.yml/badge.svg)](https://github.com/AaroNLaU0307/orderflow-research-engine/actions/workflows/tests.yml)
+
 A confirmatory quantitative research project testing whether classic
 order-flow footprint signals contain exploitable information in Binance
 BTCUSDT perpetual futures, under a falsification-first, pre-registered

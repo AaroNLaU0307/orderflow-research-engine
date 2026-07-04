@@ -22,7 +22,7 @@ study: the official Binance historical archive carries no full-depth L2
 order book history, and third-party vendors' free tiers (1st-of-month
 samples only) are structurally insufficient for a confirmatory event
 study. No claim of "no edge" is made for H4/H5; they are simply untested.
-See [`preregistration/PREREGISTRATION.md`](preregistration/PREREGISTRATION.md#3-data-blocked-register--h4-h5)
+See [`preregistration/PREREGISTRATION.md`](preregistration/PREREGISTRATION.md#3-data-blocked-register---h4-h5)
 section 3.
 
 The remaining four - **H1 delta divergence, H2 absorption, H3 stacked

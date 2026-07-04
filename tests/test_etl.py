@@ -11,19 +11,30 @@ SAMPLE = Path(__file__).resolve().parents[1] / "data" / "sample"
 RECENT = SAMPLE / "extracted"
 OLD = SAMPLE / "old_extracted"
 
-pytestmark = pytest.mark.skipif(not RECENT.exists(), reason="Phase 0 sample files not present on this machine")
+# Applied per-test (not module-wide via `pytestmark`) below: only the tests
+# that actually read the real Phase 0 sample files need it. Several tests in
+# this file build their own synthetic content via `tmp_path` and must not be
+# skipped just because they happen to live in the same module.
+_skip_if_absent = pytest.mark.skipif(not RECENT.exists(), reason="Phase 0 sample files not present on this machine")
 
 
+def needs_sample(func):
+    return pytest.mark.data(_skip_if_absent(func))
+
+
+@needs_sample
 def test_sniff_header_present_recent_era():
     assert etl.sniff_header(RECENT / "aggTrades" / "BTCUSDT-aggTrades-2025-03-17.csv") is True
     assert etl.sniff_header(RECENT / "klines" / "BTCUSDT-1m-2025-03-17.csv") is True
 
 
+@needs_sample
 def test_sniff_header_absent_old_era():
     assert etl.sniff_header(OLD / "aggTrades" / "BTCUSDT-aggTrades-2022-07-01.csv") is False
     assert etl.sniff_header(OLD / "klines" / "BTCUSDT-1m-2022-07-01.csv") is False
 
 
+@needs_sample
 def test_read_aggtrades_normalizes_both_eras_to_same_schema():
     recent = etl.read_aggtrades(RECENT / "aggTrades" / "BTCUSDT-aggTrades-2025-03-17.csv")
     old = etl.read_aggtrades(OLD / "aggTrades" / "BTCUSDT-aggTrades-2022-07-01.csv")
@@ -33,6 +44,7 @@ def test_read_aggtrades_normalizes_both_eras_to_same_schema():
     assert old["transact_time"][0] == 1656633600033
 
 
+@needs_sample
 def test_read_klines_normalizes_both_eras():
     recent = etl.read_klines(RECENT / "klines" / "BTCUSDT-1m-2025-03-17.csv")
     old = etl.read_klines(OLD / "klines" / "BTCUSDT-1m-2022-07-01.csv")
@@ -41,12 +53,14 @@ def test_read_klines_normalizes_both_eras():
     assert recent.height == 1440
 
 
+@needs_sample
 def test_read_fundingrate():
     fr = etl.read_fundingrate(RECENT / "fundingRate" / "BTCUSDT-fundingRate-2025-03.csv")
     assert fr.columns == etl.FUNDINGRATE_COLUMNS
     assert fr["funding_interval_hours"].unique().to_list() == [8]
 
 
+@needs_sample
 def test_read_bookdepth():
     bd = etl.read_bookdepth(RECENT / "bookDepth" / "BTCUSDT-bookDepth-2025-03-17.csv")
     assert bd.columns == etl.BOOKDEPTH_COLUMNS
@@ -82,6 +96,7 @@ def test_sniff_ts_unit(sample_int, expected_unit):
     assert etl.sniff_ts_unit(sample_int) == expected_unit
 
 
+@needs_sample
 def test_aggtrades_klines_volume_reconciliation_within_tolerance():
     """Reproduces the Phase 0 QA sanity check as a permanent regression test."""
     trades = etl.read_aggtrades(RECENT / "aggTrades" / "BTCUSDT-aggTrades-2025-03-17.csv")

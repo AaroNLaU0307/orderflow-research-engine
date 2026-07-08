@@ -354,7 +354,8 @@ from the same input data.
 Part of a systematic research series applying the same falsification-first
 protocol across asset classes and strategy families:
 
-- [`multi-asset-tsmom-research`](https://github.com/AaroNLaU0307/multi-asset-tsmom-research) - time-series momentum across asset classes, **confirmed** (net Sharpe ~0.70-0.75, bootstrap CI excludes zero); XSMOM and four overlay studies falsified under the same gates.
-- [`quant-backtest-framework`](https://github.com/AaroNLaU0307/quant-backtest-framework) - multi-instrument SMC/ICT price-action study, **falsified** (0/16 cells, DSR ~ 0).
+- [`multi-asset-tsmom-research`](https://github.com/AaroNLaU0307/multi-asset-tsmom-research) - time-series momentum across asset classes, **confirmed** (net Sharpe 0.75, 95% bootstrap CI [0.29, 1.23] excludes zero); XSMOM and four overlay studies falsified under the same gates.
+- [`quant-backtest-framework`](https://github.com/AaroNLaU0307/quant-backtest-framework) - multi-instrument SMC price-action study, **falsified** (0/210 cross-instrument BH-FDR across 5 instruments x 42 configs).
+- [`spot-mfi-btc-perp-research`](https://github.com/AaroNLaU0307/spot-mfi-btc-perp-research) - spot money-flow signals for BTC perps, base study **falsified** (0/42 BH-FDR); funding-divergence follow-up **inconclusive, leaning falsified**.
 
 The series' base rate is the point: confirmations are earned against the same gates that falsify everything else.

@@ -45,7 +45,7 @@ highest-mean cell among those clearing raw p<0.05, before any FDR
 correction - was **H1 at the 1-hour horizon, +2.1bp gross**. Against the
 pre-registered materiality bar of 18bp (1.5x the ~12bp round-trip cost
 floor: 5bp taker fee + slippage, each side), that cell sits roughly
-**9x below** the threshold required to call it economically material -
+**8.5x below** the threshold required to call it economically material -
 before even factoring in that it does not survive multiplicity
 correction. **This is a double null: informational (fails BH-FDR) and
 economic (even the best cell falls far short of materiality).**

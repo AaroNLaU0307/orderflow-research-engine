@@ -126,3 +126,52 @@ All four are documented in detail in `reports/QA_SUMMARY.md`,
 "honest reporting" principle - just not here, since DEVIATIONS.md is
 specifically reserved for changes to locked pre-registered definitions,
 and none occurred.
+
+## Entry 3 (2026-09-27): Disclosure - an unseeded 10,000-rep run crossed BH-FDR for H1
+
+**What this entry is:** a disclosure and a correction, not a new change to
+a locked definition. It records a run that entry 1 leaves out and corrects
+the statements above that contradict it. Entries 1 and 2 stand as written.
+
+**What happened:** until commit `e4a5d09` (2026-07-02), each cell's
+bootstrap seed was `hash((signal, horizon)) % 2**31`. Python randomizes
+`hash()` of strings and tuples per process, so every run of
+`runners/phase3_event_study.py` drew different resamples. The first
+committed run (`8c3c3bb`, 10,000 reps) was 0/20 BH-significant (H1 h=6
+p = 0.0112, h=12 p = 0.0098). According to the `e4a5d09` commit message, a
+second run at the same 10,000 reps, "made only to pick up a report-text
+addition, no statistical code change", "flipped H1's gate 2 from False to
+True". Gate 2 (PREREGISTRATION.md section 6.5) requires BH-FDR significance
+(q = 0.10, 20-cell family) at >= 2 horizons, at least one of them >= 30
+minutes, so in that run at least two H1 cells were BH-significant. That
+run's output was not committed: which H1 cells crossed, and their
+p-values, are not recorded. The flip is what exposed the seed bug.
+`e4a5d09` replaced the seed with `orderflow.stats.stable_seed`; its
+10,000-rep run was 0/20 (H1 h=6 p = 0.0106, h=12 p = 0.0124). The
+rep-count increase of entry 1 followed on 2026-07-03.
+
+**What it means:** at the pre-registered 10,000 reps, H1's BH-FDR outcome
+depended on the random seed. At 2,000,000 reps with fixed seeds the
+result is 0/20 under all three seed labels tried (entry 1). In the committed
+2,000,000-rep cells (`reports/event_study_btc_cells.csv`) the smallest
+BH-adjusted q is 0.109, shared by H1 h=6 and H1 h=12; H1 h=12 has raw
+p = 0.01092 against its rank-2 BH threshold of 0.0100, with a Monte Carlo
+standard error of about 0.00007 on that p. A gate-2 pass could not have
+promoted H1: cell means do not depend on the seed, and H1's largest mean
+at any horizon is 2.33 bp, far below the 18 bp materiality bar, so gate 3
+fails at every seed. In the flipped run H1 would have been reported as
+outcome (b), economic null, instead of (a), informational null
+(PREREGISTRATION.md section 2).
+
+**Corrections to the text above:**
+- Entry 1, "What would have happened at the original value": "neither was
+  ever BH-significant at either rep count" holds for the committed runs
+  only. At 10,000 reps one unseeded run had at least two BH-significant
+  H1 cells, as described here.
+- Entry 2, "Final sweep", last bullet: "0 of 20 cells were BH-significant
+  before and after the fix" likewise holds for the committed runs only.
+- Entry 2, "Final sweep", first sentence and closing paragraph ("no locked
+  definition in PREREGISTRATION.md changed after sign-off", "none
+  occurred"): the sweep was written in commit `aa6370c`, before entries 1
+  and 2 were logged in commit `6c42fe5`. Entry 1 is a change to a locked
+  value (bootstrap reps 10,000 -> 2,000,000).

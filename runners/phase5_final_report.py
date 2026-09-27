@@ -62,8 +62,8 @@ def run() -> None:
     lines.append("from the source CSV/JSON artifacts of each phase, never hand-typed. Do not hand-edit.")
     lines.append("")
     lines.append(f"Study period: {STUDY_START.date()} to {STUDY_END.date()}. In-sample (discovery): "
-                  f"{IS_START.date()} to {IS_END.date()}. Out-of-sample (confirmation, reserved, untouched "
-                  f"by this study - see section 3): {OOS_START.date()} to {OOS_END.date()}.")
+                  f"{IS_START.date()} to {IS_END.date()}. Out-of-sample (confirmation, reserved; no OOS return "
+                  f"statistic computed - see section 3): {OOS_START.date()} to {OOS_END.date()}.")
     lines.append("")
 
     # ---- Section 1: headline verdict ----
@@ -71,6 +71,9 @@ def run() -> None:
     cells_df = pl.read_csv(REPORTS_DIR / "event_study_btc_cells.csv")
     n_promoted = gates_df.filter(pl.col("promoted")).height
     n_bh_sig = cells_df.filter(pl.col("bh_significant_q10")).height
+    # smallest Benjamini-Hochberg adjusted q over the family = min_i p_(i) * m / i
+    p_sorted = cells_df["p_value"].sort().to_list()
+    min_bh_q = min(p * len(p_sorted) / rank for rank, p in enumerate(p_sorted, start=1))
 
     lines.append("## 1. Headline result")
     lines.append("")
@@ -79,8 +82,8 @@ def run() -> None:
         f"imbalance, H6 exhaustion) were tested on BTCUSDT perpetual futures in-sample under a "
         f"pre-registered falsification protocol. Two further hypotheses (H4 liquidity wall, H5 liquidity "
         f"pull) were DATA-BLOCKED for the entire study (section 6). Of the 20 tested cells (4 signals x "
-        f"5 horizons), **{n_bh_sig} cleared BH-FDR significance at q={FDR_Q}**, and "
-        f"**{n_promoted} of 4 signals were promoted** to the confirmatory backtest."
+        f"5 horizons), **{n_bh_sig} cleared BH-FDR significance at q={FDR_Q}** (smallest BH-adjusted "
+        f"q = {min_bh_q:.3f}), and **{n_promoted} of 4 signals were promoted** to the confirmatory backtest."
     )
     lines.append("")
     # "Best cell" for the economic-materiality comparison = highest mean
@@ -164,8 +167,12 @@ def run() -> None:
         f"Zero signals were promoted in section 2, so per preregistration section 6.5 and explicit "
         f"instruction: **Phase 4 confirmatory backtest was not run (no-op).** The out-of-sample segment "
         f"({OOS_START.date()} to {OOS_END.date()}) is reserved for promoted signals only; none were "
-        f"promoted, so **no event-return statistic of any kind was computed on OOS data** - not "
-        f"descriptively, not for completeness. It remains untouched, available cleanly for any future "
+        f"promoted, so **no OOS return statistic of any kind was computed or reported** - not "
+        f"descriptively, not for completeness. OOS bars were read: event detection ran over the full "
+        f"sample (the OOS event counts in section 5), and the Phase 3 run behind the committed cells "
+        f"(before 2026-09-27) computed per-event OOS forward returns in memory before filtering to "
+        f"in-sample; since then runners/phase3_event_study.py drops OOS events and bars before any "
+        f"forward return is computed. OOS returns remain unexamined, reserved for any future "
         f"pre-registered follow-up. ETH replication is promoted-signals-only per the prereg; the ETH bar "
         f"store exists and passed the same Phase 2 QA as BTC (see reports/QA_SUMMARY.md), but no ETH "
         f"detection or event study was run, since there is nothing to replicate."
@@ -246,12 +253,27 @@ def run() -> None:
     lines.append("")
 
     # ---- Section 8: methodology summary ----
+    uneven_n = []
+    for sig in cells_df["signal"].unique(maintain_order=True).to_list():
+        sig_cells = cells_df.filter(pl.col("signal") == sig).sort("horizon_bars")
+        if sig_cells["n_events"].n_unique() > 1:
+            per_h = ", ".join(f"h={h}: {n}" for h, n in zip(sig_cells["horizon_bars"], sig_cells["n_events"]))
+            uneven_n.append(f"{sig} ({per_h})")
+    event_set_note = (
+        "Quarantine nulling (below) is per horizon, so the horizons of a signal share an identical event "
+        "set only where no forward window overlaps the quarantine; N differs across horizons for "
+        + "; ".join(uneven_n) + "."
+        if uneven_n
+        else "Every signal has the same N at all 5 horizons."
+    )
     lines.append("## 8. Methodology summary")
     lines.append("")
     lines.append(
         "- **Pre-registration before PnL:** preregistration/PREREGISTRATION.md, frozen before any forward "
         "return or PnL was computed; one revision during review (the h*/E(signal) promotion-horizon rule) "
-        "is recorded in that document's Appendix A, not as a post-approval deviation.\n"
+        "is recorded in that document's Appendix A, not as a post-approval deviation. Post-approval "
+        "changes and disclosures are in preregistration/DEVIATIONS.md (entry 1: bootstrap reps "
+        "10,000 -> 2,000,000; entry 3: an unseeded 10,000-rep run crossed BH-FDR for H1).\n"
         "- **FDR family:** exactly the 20 BTC in-sample cells (4 signals x 5 horizons), Benjamini-Hochberg "
         "at q=0.10. OOS and ETH cells are confirmatory follow-ups outside this family, by design - moot "
         "here since nothing was promoted.\n"
@@ -260,13 +282,14 @@ def run() -> None:
         "deterministic rule selects h* = argmax bootstrap t-statistic over E(signal). This decouples "
         "'does an edge exist' from 'which horizon is traded', eliminating a post-hoc degree of freedom. "
         "Never exercised in this study since no signal reached gate 3.\n"
-        "- **Day-cluster bootstrap:** p-values and CIs resample calendar days (not individual events) with "
-        "replacement, 2,000,000 reps (precision amendment - preregistration/DEVIATIONS.md entry 1; "
-        "originally pre-registered at 10,000), respecting intraday event clustering and serial "
-        "dependence. Seeded deterministically (orderflow.stats.stable_seed) after a reproducibility bug "
-        "was found and fixed mid-review (Python's hash() on a tuple is randomized per process by "
-        "default); the precision amendment additionally verified BH-significance is stable across 3 "
-        "independent seeds (section 2.1). Spearman IC keeps its own lower rep count (10,000, unchanged) "
+        "- **Day-cluster bootstrap:** p-values and CIs resample calendar days (not individual events), "
+        "drawn iid with replacement - a cluster bootstrap over event-days - 2,000,000 reps (precision "
+        "amendment - preregistration/DEVIATIONS.md entry 1; originally pre-registered at 10,000), "
+        "respecting intraday event clustering and within-day dependence. Seeded deterministically "
+        "(orderflow.stats.stable_seed) after a reproducibility bug was found and fixed mid-review "
+        "(Python's hash() on a tuple is randomized per process by default; one such unseeded 10,000-rep "
+        "run passed H1's BH-FDR gate - preregistration/DEVIATIONS.md entry 3); the precision amendment "
+        "additionally verified BH-significance is stable across 3 independent seeds (section 2.1). Spearman IC keeps its own lower rep count (10,000, unchanged) "
         "- informational-only per preregistration section 6.2, never worth the cost of the same "
         "precision.\n"
         "- **Circular-shift placebo:** additive, non-gating supplement (preregistration/DEVIATIONS.md "
@@ -275,11 +298,12 @@ def run() -> None:
         "existence of drift itself.\n"
         "- **Segment purging:** an event is admitted to a segment's statistics only if its longest "
         "horizon's forward window (48 bars) closes entirely within that same segment - per-event, not "
-        "per-horizon, so all 5 horizons of a cell always share an identical event set.\n"
+        "per-horizon. " + event_set_note + "\n"
         "- **Quarantine:** a confirmed exchange-side data gap (2022-09-06, both symbols, present in both "
         "monthly and daily Binance archives) is excluded from event formation and any forward-return "
-        "window overlapping it is nulled - src/orderflow/quarantine.py, applied before dedup so a "
-        "quarantined event cannot have suppressed a legitimate nearby one via the 6-bar dedup rule.\n"
+        "window overlapping it is nulled, horizon by horizon - src/orderflow/quarantine.py, applied "
+        "before dedup so a quarantined event cannot have suppressed a legitimate nearby one via the "
+        "6-bar dedup rule.\n"
         f"- **DSR trial count:** N=140, declared and enumerated in section 3 above (the placebo's 20 "
         f"cells are deliberately excluded - see section 3)."
     )

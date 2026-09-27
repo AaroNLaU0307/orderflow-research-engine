@@ -10,7 +10,7 @@ protocol. This is not a trading bot and ships no live strategy.
 > **Question:** do six classic order-flow signals carry exploitable information in BTC perps?
 > **Data:** 48 months Binance BTCUSDT+ETHUSDT perp aggTrades, ~54GB, checksum-verified, QA'd.
 > **Method:** pre-registered falsification protocol - 20-cell family, BH-FDR q=0.10, day-cluster bootstrap at 2,000,000 reps, economic materiality gate at 1.5x costs.
-> **Result:** 0/20 significant; 2 signals data-blocked (disclosed); zero promotions; OOS never opened.
+> **Result:** 0/20 BH-FDR significant (smallest BH-adjusted q = 0.109); 2 signals data-blocked (disclosed); zero promotions; no OOS return statistic computed or reported.
 > **Why it matters:** a certified negative at institutional rigor - the pipeline that produces it is the deliverable.
 
 ## Result
@@ -37,6 +37,16 @@ promoted.** H3 (62 in-sample events) and H6 (286 events) additionally
 failed the minimum-event-count gate (>=300) at the pre-registered
 convention parameters - underpowered, not merely null.
 
+The nearest misses are H1 at 30m and 1h, both at a BH-adjusted q of
+**0.109** against the 0.10 level. At the originally pre-registered 10,000
+bootstrap reps this outcome depended on the random seed: before the seed
+was fixed, one unseeded 10,000-rep run put at least two H1 cells under the
+BH threshold, passing H1's FDR gate (its means, at most 2.3bp, still
+failed the 18bp materiality gate, so nothing would have been promoted). At
+2,000,000 reps with fixed seeds the result is 0/20 under all three seed
+labels. Disclosed in
+[`preregistration/DEVIATIONS.md`](preregistration/DEVIATIONS.md) entry 3.
+
 ![Fig 2: BH-FDR step-up plot](reports/figures/fig2_bh_step.png)
 *Fig 2 - Benjamini-Hochberg step-up procedure, 20-cell family. No point falls on or below the threshold line; the two nearest misses (H1 at 30m and 1h) are seed-invariant across 3 independent seeds at 2,000,000 reps.*
 
@@ -53,11 +63,18 @@ economic (even the best cell falls far short of materiality).**
 Because no signal was promoted:
 - **The Phase 4 confirmatory backtest was not run.** There is nothing to
   confirm.
-- **The out-of-sample segment (2025-01-01 to 2026-06-30) was not
-  touched by any event-return statistic** - not descriptively, not for
-  completeness. Promotion gates exist precisely to decide what is
-  allowed to see OOS data; nothing cleared them, so OOS remains reserved
-  and clean for any future pre-registered follow-up.
+- **No out-of-sample return statistic was computed or reported** for
+  the OOS segment (2025-01-01 to 2026-06-30) - not descriptively, not for
+  completeness. Promotion gates decide what may be tested on OOS data;
+  nothing cleared them. The OOS bars were read, though: event detection
+  ran over all 48 months (OOS event counts are published in
+  `reports/event_counts_by_half_year.csv` and in the "Final" column of the
+  event-accounting table in `reports/event_study_btc.md`), and the Phase 3
+  run behind the committed results computed per-event OOS forward returns
+  in memory before filtering to in-sample. Since 2026-09-27
+  `runners/phase3_event_study.py` drops OOS events and bars before any
+  forward return is computed. OOS returns remain unexamined and reserved
+  for a future pre-registered follow-up.
 - **ETH replication was not run** (promoted-signals-only per the
   prereg). The ETH bar store was ingested and passed the same Phase 2 QA
   as BTC.
@@ -149,7 +166,7 @@ N/A rather than skipped.
 
 | Test | Status |
 |---|---|
-| Bootstrap resampling | **Done, precision-amended:** day-cluster bootstrap, 2,000,000 reps (raised from the originally pre-registered 10,000 - [`preregistration/DEVIATIONS.md`](preregistration/DEVIATIONS.md) entry 1), respects intraday clustering and serial dependence, seed-invariance verified across 3 independent seeds. [`reports/event_study_btc.md`](reports/event_study_btc.md) (Cells + Seed invariance sections). |
+| Bootstrap resampling | **Done, precision-amended:** day-cluster bootstrap (event-days drawn iid with replacement), 2,000,000 reps (raised from the originally pre-registered 10,000 - [`preregistration/DEVIATIONS.md`](preregistration/DEVIATIONS.md) entry 1), respects intraday clustering and within-day dependence, seed-invariance verified across 3 independent seeds. At 10,000 reps an unseeded run crossed BH-FDR for H1 (entry 3). [`reports/event_study_btc.md`](reports/event_study_btc.md) (Cells + Seed invariance sections). |
 | Permutation / placebo | **Done:** circular-shift placebo, a drift-absorbing null that tests event-return *alignment* net of market beta rather than the existence of drift itself - the one failure channel (bull-market beta masquerading as signal) the bootstrap alone doesn't isolate. Additive, non-gating supplement - [`preregistration/DEVIATIONS.md`](preregistration/DEVIATIONS.md) entry 2, [`reports/event_study_btc.md`](reports/event_study_btc.md) (Circular-shift placebo section). |
 | Monte Carlo PnL reshuffling | **N/A - no promoted strategy exists to reshuffle.** The pre-registered spec (stationary block bootstrap on daily PnL, block length 5 days, 10,000 reps) is fully written for any future promoted strategy - [`preregistration/PREREGISTRATION.md`](preregistration/PREREGISTRATION.md) section 7. |
 | Walk-forward re-optimization | **N/A by design, not by omission.** Zero fitted parameters exist in this study - every detector threshold is a fixed convention value, never fit to data - so the failure mode walk-forward re-optimization guards against (parameter overfitting) is precluded structurally. A purge (= h\*'s bar length) + 1-day embargo walk-forward evaluation is pre-specified for any promoted strategy's OOS confirmation - [`preregistration/PREREGISTRATION.md`](preregistration/PREREGISTRATION.md) section 7. |
@@ -159,10 +176,10 @@ N/A rather than skipped.
 | Noise injection | **Not informative for a null result** (noise can destroy real structure, it cannot manufacture a signal that survives BH-FDR) - not run for that reason, not omitted by oversight. The dominant footprint-specific noise channel, bucket-boundary placement, is already covered by the Delta=10/Delta=50 sensitivity configs. [`reports/sensitivity_grid.md`](reports/sensitivity_grid.md). |
 | Cross-timeframe | **Done:** 3-minute and 15-minute bar configs, both report-only sensitivity, both consistent with the primary null. [`reports/sensitivity_grid.md`](reports/sensitivity_grid.md). |
 | Cross-instrument | **Deliberately withheld, not skipped:** ETH replication is promotion-gated by the prereg - running it on signals that never cleared BTC discovery would spend the one reserved confirmation universe for zero confirmatory value. The ETH bar store exists and passed the identical Phase 2 QA gate as BTC. [`preregistration/PREREGISTRATION.md`](preregistration/PREREGISTRATION.md) section 7, [`reports/QA_SUMMARY.md`](reports/QA_SUMMARY.md). |
-| Blind hold-out | **Held in the strictest state achievable:** the 18-month OOS segment (2025-01-01 to 2026-06-30) is locked, single-use, and was never opened by any event-return computation - not descriptively, not for completeness - because nothing earned access. [`reports/FINAL_REPORT.md`](reports/FINAL_REPORT.md) section 3. |
+| Blind hold-out | **Held for returns, not for bars:** the 18-month OOS segment (2025-01-01 to 2026-06-30) is reserved and single-use, and no OOS return statistic was computed or reported, because nothing earned access. OOS bars were read for event detection and event counts, and the Phase 3 run behind the committed results computed per-event OOS forward returns in memory before filtering to in-sample; the runner now drops OOS events and bars before any forward return is computed. [`reports/FINAL_REPORT.md`](reports/FINAL_REPORT.md) section 3. |
 | Look-ahead / leakage tests | **Done:** a dedicated truncation-invariance pytest suite for every detector, plus a next-bar-open execution convention throughout (an event is only actionable using the bar close that revealed it). [`tests/test_truncation_invariance.py`](tests/test_truncation_invariance.py). |
 | Multiplicity control | **Done:** Benjamini-Hochberg FDR at q=0.10 over a declared, closed 20-cell family; total trial count N=140 declared for Deflated Sharpe Ratio purposes regardless of there being no promoted strategy to deflate. [`reports/event_study_btc.md`](reports/event_study_btc.md), [`reports/FINAL_REPORT.md`](reports/FINAL_REPORT.md) section 3. |
-| Reproducibility | **Done:** deterministic seeding throughout (`orderflow.stats.stable_seed`), byte-identical output across repeated runs, and - new in the precision amendment - BH-significance seed-invariance verified across 3 independent seeds at 2,000,000 reps. [`preregistration/DEVIATIONS.md`](preregistration/DEVIATIONS.md) entries 1-2, [`reports/event_study_btc.md`](reports/event_study_btc.md) (Seed invariance section). |
+| Reproducibility | **Done:** deterministic seeding throughout (`orderflow.stats.stable_seed`), byte-identical output across repeated runs, and - new in the precision amendment - BH-significance seed-invariance verified across 3 independent seeds at 2,000,000 reps. A full re-run also needs `data/quarantine_windows.json`, not yet in this repository (see Provenance below). [`preregistration/DEVIATIONS.md`](preregistration/DEVIATIONS.md) entries 1-3, [`reports/event_study_btc.md`](reports/event_study_btc.md) (Seed invariance section). |
 
 ## Methodology
 
@@ -176,9 +193,12 @@ committed before any code touched a forward return or PnL figure. The
 document went through one substantive review round before sign-off,
 recorded in its own Appendix A rather than as a post-hoc deviation
 (the largest change: replacing an underspecified "best horizon" concept
-with a fully deterministic two-step rule, below). No definition changed
-after sign-off; `preregistration/DEVIATIONS.md` is the log for any that
-would have, and is empty.
+with a fully deterministic two-step rule, below). After sign-off one
+locked value changed: the primary bootstrap's rep count, raised from
+10,000 to 2,000,000 ([`preregistration/DEVIATIONS.md`](preregistration/DEVIATIONS.md)
+entry 1). Entry 2 logs the additive, non-gating circular-shift placebo;
+entry 3 discloses that at 10,000 reps an unseeded run crossed BH-FDR for
+H1 (see Result above).
 
 **Promotion is two decoupled, mechanical steps - built, and never fired
 in this study:**
@@ -207,33 +227,45 @@ this family - standard discovery-vs-confirmation separation, moot here
 since discovery produced no promotions.
 
 **Day-cluster bootstrap.** Every p-value and confidence interval resamples
-*calendar days* (not individual events) with replacement, 2,000,000
-repetitions (precision amendment - `preregistration/DEVIATIONS.md` entry
-1; originally pre-registered at 10,000), respecting intraday event
-clustering and serial dependence - the concrete implementation of a
-stationary block bootstrap. The resampling is seeded deterministically
-(`orderflow.stats.stable_seed`, a `zlib.crc32`-based seed) after a real
-reproducibility bug was found mid-review: Python's built-in `hash()` on a
-tuple is randomized per process by default, so an earlier version of this
-pipeline silently produced different p-values on every run from identical
-data. Two full runs now produce byte-identical output; BH-significance is
-additionally verified seed-invariant across 3 independent seeds at the
-amended rep count.
+*calendar days* (not individual events): the days holding at least one
+event of the cell are drawn iid with replacement, 2,000,000 repetitions
+(precision amendment - `preregistration/DEVIATIONS.md` entry 1; originally
+pre-registered at 10,000). This keeps intraday event clustering and
+within-day dependence intact and treats days as independent - a cluster
+bootstrap over event-days, not the stationary block bootstrap the
+pre-registration's label for it suggests
+([`docs/CORRECTIONS_2026-09-27.md`](docs/CORRECTIONS_2026-09-27.md)). The
+resampling is seeded deterministically (`orderflow.stats.stable_seed`, a
+`zlib.crc32`-based seed) after a real reproducibility bug was found
+mid-review: Python's built-in `hash()` on a tuple is randomized per process
+by default, so an earlier version of this pipeline silently produced
+different p-values on every run from identical data. One of those runs, at
+10,000 reps, passed H1's BH-FDR gate where the committed runs did not
+(`preregistration/DEVIATIONS.md` entry 3). Two full runs now produce
+byte-identical output; BH-significance is additionally verified
+seed-invariant across 3 independent seeds at the amended rep count.
 
 **Segment purging.** An event is admitted into a segment's (IS or OOS)
 statistics only if its *longest* tested horizon's forward window closes
 entirely within that same segment - decided once per event, not once per
-horizon, so every horizon of a given signal-cell always shares an
-identical event set and no horizon comparison is confounded by a shifting
-sample.
+horizon, so the purge never gives different horizons of a signal
+different events. The quarantine nulling below is per horizon, though: an
+event whose longer forward windows overlap the quarantine keeps its
+shorter-horizon returns. H1 therefore has 4,609 in-sample events at
+h=1/3/6 and 4,608 at h=12/48 (`n_events` in
+[`reports/event_study_btc_cells.csv`](reports/event_study_btc_cells.csv));
+H2, H3 and H6 have the same N at all five horizons.
 
 **Quarantine.** A confirmed exchange-side data gap on 2022-09-06 (both
 BTC and ETH, ending within 10 milliseconds of each other - see the
 data-engineering section below) is excluded from event formation, and any
-forward-return window overlapping it is nulled
+forward-return window overlapping it is nulled, horizon by horizon
 (`src/orderflow/quarantine.py`). This runs *before* deduplication, so a
 quarantined event can never have already suppressed a legitimate nearby
-one through the 6-bar dedup rule.
+one through the 6-bar dedup rule. The window bounds are read from
+`data/quarantine_windows.json`, which is not yet in this repository; the
+runners stop with an error when it is missing rather than silently
+running without the quarantine.
 
 **Costs.** 5bp taker fee + slippage (half-spread, negligible for BTC,
 plus a 1bp impact buffer) per side, ~12bp round trip; historical funding
@@ -293,9 +325,12 @@ ingestion timestamp of every file this pipeline ever downloaded,
 including both the original monthly zip and any daily backfill zips for
 a repaired month. `data/qa_backfill_log.jsonl` and
 `data/qa_breach_classification.jsonl` are the per-month and per-day
-record of what was found and how it was resolved; both feed directly
-into `reports/QA_SUMMARY.md`'s classification table and totals, so the
-QA report and the underlying evidence never drift apart.
+record of what was found and how it was resolved; `reports/QA_SUMMARY.md`'s
+classification table and totals are generated from them. Those two logs,
+`data/quarantine_windows.json` (the 2022-09-06 window bounds) and the step
+that applied the same-ID repair to the ten ETHUSDT 2023-05 days
+(`runners/phase2_backfill_gaps.py` repairs whole missing days only) are
+not yet in this repository; publishing them is pending.
 
 The reconciliation gate closed as **PASS-WITH-EXCEPTIONS**: every
 outstanding breach day resolved to either `KLINES_HOLE` (aggTrades
@@ -318,23 +353,27 @@ orderflow-research-engine/
 |-- README.md                  # this file
 |-- ROADMAP.md
 |-- docs/BRIEF.md               # verbatim original project brief
+|-- docs/CORRECTIONS_2026-09-27.md  # dated corrections to the frozen prereg and data-dependent reports
 |-- preregistration/
 |   |-- PREREGISTRATION.md      # frozen spec, signed off before any PnL
-|   `-- DEVIATIONS.md           # 2 entries: precision amendment, placebo supplement
+|   `-- DEVIATIONS.md           # 3 entries: precision amendment, placebo supplement, 10k-rep seed disclosure
 |-- src/orderflow/               # etl, footprint, signals/h1-h6, eventstudy, stats, costs, quarantine, figures
 |-- collector/depth_recorder.py # v1.5 L2 recorder (see ROADMAP.md)
 |-- runners/                    # phase runners; each emits reports/ artifacts
-|-- tests/                      # 104 tests: unit, truncation-invariance, integration, figure smoke tests
+|-- tests/                      # 131 tests (124 run in CI): unit, truncation-invariance, integration, figure smoke, provenance
 |-- reports/                    # runner-generated, immutable (includes reports/figures/)
+|-- results/headline.json       # headline verdict + stats, checked against reports/ by tests/test_headline.py
 `-- data/                       # gitignored except manifest.json
 ```
 
 ## Reproducing this study
 
+Python 3.13 (the version CI uses; `numpy==2.5.0` needs 3.12 or newer).
+
 ```
 python -m venv .venv && .venv/Scripts/activate  # or source .venv/bin/activate
 pip install -r requirements.txt
-pytest tests/                                    # should show 104 passed
+pytest -m "not data"                             # what CI runs: 124 passed, 7 deselected
 python runners/phase2_etl.py                     # full 48-month, 2-symbol ingest (~1hr, ~54GB download)
 python runners/phase2_qa.py                      # QA gate
 python runners/phase3_event_study.py             # the 20-cell BTC in-sample study
@@ -345,6 +384,13 @@ python runners/phase5_final_report.py            # assembles reports/FINAL_REPOR
 python runners/phase5_figures.py                 # renders reports/figures/*.png for this README
 ```
 
+The 7 `data`-marked tests read the Phase 0 sample files in `data/sample/`,
+which are not committed; without them a plain `pytest` shows 124 passed,
+7 skipped. `runners/phase3_event_study.py`, `runners/phase3_year_table.py`
+and `runners/phase5_figures.py` also need `data/quarantine_windows.json`
+(not yet in this repository - see Provenance above) and stop with an error
+without it.
+
 Every `runners/phase*.py` script is independently re-runnable and
 regenerates its `reports/*.md` / `reports/*.csv` output deterministically
 from the same input data.
@@ -354,7 +400,7 @@ from the same input data.
 Part of a systematic research series applying the same falsification-first
 protocol across asset classes and strategy families:
 
-- [`multi-asset-tsmom-research`](https://github.com/AaroNLaU0307/multi-asset-tsmom-research) - time-series momentum across asset classes, **confirmed** (net Sharpe 0.75, 95% bootstrap CI [0.29, 1.23] excludes zero); XSMOM and four overlay studies falsified under the same gates.
+- [`multi-asset-tsmom-research`](https://github.com/AaroNLaU0307/multi-asset-tsmom-research) - time-series momentum across asset classes, **supported, not independently confirmed** (net Sharpe 0.75 at 2 bps, 95% bootstrap CI [0.29, 1.23] excludes zero); XSMOM falsified and four overlay studies not promoted.
 - [`quant-backtest-framework`](https://github.com/AaroNLaU0307/quant-backtest-framework) - multi-instrument SMC price-action study, **falsified** (0/210 cross-instrument BH-FDR across 5 instruments x 42 configs).
 - [`spot-mfi-btc-perp-research`](https://github.com/AaroNLaU0307/spot-mfi-btc-perp-research) - spot money-flow signals for BTC perps, base study **falsified** (0/42 BH-FDR); funding-divergence follow-up **inconclusive, leaning falsified**.
 

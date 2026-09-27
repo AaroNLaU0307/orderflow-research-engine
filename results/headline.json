@@ -1,0 +1,90 @@
+{
+  "schema": "headline/v1",
+  "repo": "AaroNLaU0307/orderflow-research-engine",
+  "source_commit": "e10c588d536e3a0ed08617b7bbacd73d00c948cf",
+  "as_of": "2026-09-27",
+  "rows": [
+    {
+      "id": "orderflow-footprint",
+      "section": "archive",
+      "hypothesis": "Order-flow footprint signals (4 tested; 2 data-blocked, disclosed)",
+      "verdict": "null (H1, H2); underpowered (H3, H6)",
+      "verdict_detail": "pre-registered outcome (a) informational null for H1 and H2 (fail BH-FDR); outcome (c) underpowered for H3 and H6 (62 and 286 in-sample events, below the 300-event gate); H4 and H5 data-blocked, untested",
+      "mechanism": "best cell ~2 bp gross vs 18 bp materiality bar (1.5× ~12 bp round-trip cost); no OOS return statistic computed or reported",
+      "stats": [
+        {
+          "label": "BH-FDR significant cells (q = 0.10)",
+          "display": "0/20",
+          "value": 0,
+          "artifact": "reports/event_study_btc_cells.csv",
+          "locator": "column p_value (20 rows) through orderflow.stats.bh_fdr at q = 0.10; column bh_significant_q10 is false in all 20 rows",
+          "provenance": "reproduced"
+        },
+        {
+          "label": "smallest BH-adjusted q",
+          "display": "0.109",
+          "value": 0.1092,
+          "artifact": "reports/event_study_btc_cells.csv",
+          "locator": "column p_value: min over rank i of p_(i) * 20 / i, attained at rank 2 (signal H1, horizon_bars 12, p 0.01092) and shared by H1 horizon_bars 6 after the step-up",
+          "provenance": "reproduced"
+        },
+        {
+          "label": "best cell gross mean (H1, 1h)",
+          "display": "2.1 bp",
+          "value": 2.1207,
+          "artifact": "reports/event_study_btc_cells.csv",
+          "locator": "row signal H1, horizon_bars 12, column observed_mean_bp (highest mean among cells with raw p < 0.05, as runners/phase5_final_report.py defines best cell)",
+          "provenance": "reproduced"
+        },
+        {
+          "label": "materiality bar (gate 3)",
+          "display": "18 bp",
+          "value": 18.0,
+          "artifact": "src/orderflow/config.py",
+          "locator": "MATERIALITY_BP = 1.5 * ROUND_TRIP_BP",
+          "provenance": "reproduced"
+        },
+        {
+          "label": "round-trip cost",
+          "display": "12 bp",
+          "value": 12.0,
+          "artifact": "src/orderflow/config.py",
+          "locator": "ROUND_TRIP_BP = 2 * (TAKER_FEE_BP + IMPACT_BP) with TAKER_FEE_BP 5.0, IMPACT_BP 1.0",
+          "provenance": "reproduced"
+        },
+        {
+          "label": "day-cluster bootstrap reps (20 primary cells)",
+          "display": "2,000,000",
+          "value": 2000000,
+          "artifact": "reports/event_study_btc.md",
+          "locator": "line 7: 'Day-cluster bootstrap: 2,000,000 reps'",
+          "provenance": "repo-reported, not reproduced"
+        },
+        {
+          "label": "H3 in-sample events",
+          "display": "62",
+          "value": 62,
+          "artifact": "reports/event_study_btc_cells.csv",
+          "locator": "rows signal H3, column n_events (max over horizons, as gate 1 uses)",
+          "provenance": "reproduced"
+        },
+        {
+          "label": "H6 in-sample events",
+          "display": "286",
+          "value": 286,
+          "artifact": "reports/event_study_btc_cells.csv",
+          "locator": "rows signal H6, column n_events (max over horizons, as gate 1 uses)",
+          "provenance": "reproduced"
+        }
+      ],
+      "caveats": [
+        "At the pre-registered 10,000 reps the outcome depended on the seed: before commit e4a5d09 fixed it, one unseeded run passed H1's BH-FDR gate (at least two H1 cells under the BH threshold); H1's means still failed the 18 bp materiality gate. The committed runs at 10,000 and 2,000,000 reps are 0/20 (preregistration/DEVIATIONS.md entry 3).",
+        "Bootstrap reps were raised from the pre-registered 10,000 to 2,000,000 after sign-off (preregistration/DEVIATIONS.md entry 1).",
+        "The bootstrap draws event-days iid with replacement (a day-cluster bootstrap), not a stationary block bootstrap.",
+        "Best cell = highest mean among cells with raw p < 0.05; the highest raw mean is H3 h=48 at 16.0 bp (N = 62, p = 0.34).",
+        "OOS bars were read for event detection and event counts, and the run behind the committed cells computed per-event OOS forward returns in memory before filtering to in-sample; none entered any statistic.",
+        "H4 and H5 are data-blocked (no full-depth L2 history) and untested; no claim is made for them."
+      ]
+    }
+  ]
+}

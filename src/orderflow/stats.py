@@ -1,10 +1,26 @@
 """Statistical primitives for the event study (preregistration section 6).
 
-Day-cluster bootstrap: resample calendar days with replacement (restricted
-to days containing >=1 event of the cell), pool all events on the resampled
-days, recompute the statistic. This is the concrete implementation of the
-brief's "stationary block bootstrap... to respect overlap/serial
-dependence" (section 6.2).
+Provenance: written for this study in this repository (first committed in
+c369ada; seed and batching changes in e4a5d09 and a93df82). Not vendored
+from, or shared with, any other repository.
+
+- bh_fdr: Benjamini-Hochberg step-up. Default level q = 0.10, the study's
+  FDR_Q (config.py; preregistration section 6.3).
+- day_cluster_bootstrap_mean / day_cluster_bootstrap_spearman: day-cluster
+  bootstrap. The calendar days holding >=1 event of the cell are drawn iid
+  with replacement, all events on the drawn days are pooled, and the
+  statistic is recomputed. Percentile 95% CI; two-sided p = min(1,
+  2 * min(P(boot <= 0), P(boot >= 0))). This is a cluster bootstrap over
+  event-days, not a stationary (random-length block) bootstrap: dependence
+  within a day is kept, and days are treated as independent. Preregistration
+  section 6.2 calls it the implementation of the brief's "stationary block
+  bootstrap"; that label does not fit this method.
+- circular_shift_placebo: non-gating placebo; p = share of shifts with
+  |mean| >= |observed| (no +1 correction).
+- stable_seed: crc32-based seed, identical across processes.
+
+Any edit to these functions must update the pinned source hashes in
+tests/test_stats_provenance.py.
 """
 from __future__ import annotations
 
@@ -166,6 +182,9 @@ def circular_shift_placebo(
          warm_up_bars, so it always re-enters the warm-up region and is
          already excluded by requiring the window's end index to stay
          within [0, n_is_bars).
+         The real pipeline differs here: it nulls a quarantine-overlapping
+         window per horizon (quarantine.null_returns_overlapping_quarantine),
+         while this check drops the event from every horizon.
 
     Rationale: circular shifting preserves the entire return series, so
     unconditional drift sits inside the null - this tests event-return

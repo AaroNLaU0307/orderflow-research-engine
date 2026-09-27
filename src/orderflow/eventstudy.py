@@ -103,6 +103,22 @@ def add_forward_returns(events: pl.DataFrame, bars: pl.DataFrame, horizons: list
     return out
 
 
+def add_in_sample_forward_returns(events: pl.DataFrame, bars: pl.DataFrame, horizons: list[int] = HORIZONS_BARS) -> pl.DataFrame:
+    """add_forward_returns restricted to the in-sample segment: events
+    outside IS and every bar after IS_END are dropped BEFORE any forward
+    return is computed, so no out-of-sample price enters any value. For IS
+    events the output (r_h, segment, purge_ok) is identical to
+    add_forward_returns on the full bar store: an IS event whose longest
+    window would cross into OOS now runs past the last bar instead, and gets
+    purge_ok=False either way. Only the tail of the bar store is cut, so
+    bar_index still equals row position.
+    """
+    ts_ms = pl.col("bar_ts").dt.epoch(time_unit="ms")
+    is_bars = bars.sort("bar_index").filter(ts_ms <= IS_END_MS)
+    is_events = events.filter((ts_ms >= IS_START_MS) & (ts_ms <= IS_END_MS))
+    return add_forward_returns(is_events, is_bars, horizons=horizons)
+
+
 def event_day_bucket(bar_ts_series: pl.Series) -> np.ndarray:
     """Calendar-day bucket per event (day resolution), for day-cluster
     bootstrap grouping - vectorized truncation via numpy's 'D' (day) unit,

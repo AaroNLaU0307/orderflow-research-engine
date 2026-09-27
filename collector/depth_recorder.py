@@ -31,6 +31,12 @@ Restart-safe by construction: every run performs its own fresh
 snapshot+resync, so a crash or restart only costs the resync gap (a few
 seconds), never corrupted or ambiguous on-disk state - each flushed
 parquet file is a self-contained, already-ordered chunk of diff events.
+
+Every sync also persists the REST snapshot book itself
+(`{SYMBOL}_snapshot_{ts}.parquet`, one row: lastUpdateId plus the full
+bids/asks) next to the diff files. The diffs alone cannot rebuild the
+book: a level that rests unchanged after the snapshot never appears in any
+diff event.
 """
 from __future__ import annotations
 
@@ -103,6 +109,35 @@ class DepthRecorder:
         )
         self.n_recorded += 1
 
+    def _persist_snapshot(self, snapshot: dict) -> Path:
+        """Write the REST snapshot book (the starting state the diffs are
+        applied to) as a one-row parquet next to the diff files, bids/asks
+        JSON-encoded exactly like the diff rows."""
+        received_at = dt.datetime.now(dt.timezone.utc)
+        df = pl.DataFrame(
+            {
+                "last_update_id": [snapshot["lastUpdateId"]],
+                "event_time_ms": [snapshot.get("E")],
+                "transact_time_ms": [snapshot.get("T")],
+                "received_time_ms": [int(received_at.timestamp() * 1000)],
+                "bids": [json.dumps(snapshot["bids"])],
+                "asks": [json.dumps(snapshot["asks"])],
+            },
+            schema={
+                "last_update_id": pl.Int64,
+                "event_time_ms": pl.Int64,
+                "transact_time_ms": pl.Int64,
+                "received_time_ms": pl.Int64,
+                "bids": pl.Utf8,
+                "asks": pl.Utf8,
+            },
+        )
+        self.out_dir.mkdir(parents=True, exist_ok=True)
+        path = self.out_dir / f"{self.symbol}_snapshot_{received_at.strftime('%Y%m%dT%H%M%S%f')}.parquet"
+        df.write_parquet(path)
+        log(f"  saved snapshot book ({len(snapshot['bids'])} bids, {len(snapshot['asks'])} asks) -> {path.name}")
+        return path
+
     def _flush(self) -> None:
         if not self.buffer:
             return
@@ -131,6 +166,7 @@ class DepthRecorder:
                     continue
             snapshot = snapshot_task.result()
             self.snapshot_last_update_id = snapshot["lastUpdateId"]
+            self._persist_snapshot(snapshot)
             log(f"Snapshot lastUpdateId={self.snapshot_last_update_id}, {len(pending)} events buffered during fetch")
 
             pending = [e for e in pending if e["u"] > self.snapshot_last_update_id]

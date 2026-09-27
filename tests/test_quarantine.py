@@ -40,8 +40,15 @@ def test_load_quarantine_windows(tmp_path):
     assert windows["ETHUSDT"] == [(1, 2)]
 
 
-def test_load_quarantine_windows_missing_file(tmp_path):
-    assert quarantine.load_quarantine_windows(tmp_path / "nope.json") == {}
+def test_load_quarantine_windows_missing_file_fails_closed(tmp_path):
+    """A missing quarantine file must stop the run, not silently drop the
+    2022-09-06 quarantine and change the event sets."""
+    with pytest.raises(FileNotFoundError, match="quarantine window file not found"):
+        quarantine.load_quarantine_windows(tmp_path / "nope.json")
+
+
+def test_load_quarantine_windows_missing_file_allowed_when_explicit(tmp_path):
+    assert quarantine.load_quarantine_windows(tmp_path / "nope.json", allow_missing=True) == {}
 
 
 def test_filter_quarantined_events_drops_overlapping_bar():

@@ -1,7 +1,8 @@
 """Quarantine windows: time ranges where the raw data has a confirmed
 upstream gap (present in both the monthly AND daily Binance archives, so
-not repairable by re-splicing - see data/quarantine_windows.json for the
-forensic detail per window). Bars overlapping a quarantine window are
+not repairable by re-splicing). The windows are read from
+data/quarantine_windows.json, a local file that is not yet committed to
+this repository. Bars overlapping a quarantine window are
 excluded from event formation; any forward-return window overlapping one
 is nulled. This is intentionally separate from the ordinary zero-trade-bar
 forward-fill (footprint.py) - a quarantine window marks data we know is
@@ -17,9 +18,21 @@ import polars as pl
 DEFAULT_PATH = Path(__file__).resolve().parents[2] / "data" / "quarantine_windows.json"
 
 
-def load_quarantine_windows(path: Path = DEFAULT_PATH) -> dict[str, list[tuple[int, int]]]:
+def load_quarantine_windows(path: Path = DEFAULT_PATH, *, allow_missing: bool = False) -> dict[str, list[tuple[int, int]]]:
+    """{symbol: [(start_ms, end_ms), ...]} from the quarantine JSON.
+
+    Fails closed: a missing file raises FileNotFoundError rather than
+    returning no windows, because running without the 2022-09-06 quarantine
+    silently changes the event sets and returns. Pass allow_missing=True
+    only when running with no quarantine at all is intended.
+    """
     if not path.exists():
-        return {}
+        if allow_missing:
+            return {}
+        raise FileNotFoundError(
+            f"quarantine window file not found: {path} - refusing to run without the quarantine; "
+            "pass allow_missing=True only if no quarantine is intended"
+        )
     with open(path, "r", encoding="utf-8") as fh:
         records = json.load(fh)
     out: dict[str, list[tuple[int, int]]] = {}
@@ -49,7 +62,9 @@ def null_returns_overlapping_quarantine(
     """For events surviving filter_quarantined_events, null out any r_{h}
     whose [entry_bar, target_bar] window overlaps a quarantine window -
     the event's own trigger bar is clean, but its forward-return horizon
-    may still run through a quarantined stretch.
+    may still run through a quarantined stretch. Nulling is per horizon, so
+    an event can keep its short-horizon returns and lose its long ones: the
+    horizons of one signal do not always share an identical event set.
     """
     sym_windows = windows.get(symbol, [])
     if not sym_windows or events.height == 0:

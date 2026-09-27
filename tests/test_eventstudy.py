@@ -3,6 +3,7 @@ import datetime as dt
 import numpy as np
 import polars as pl
 import pytest
+from polars.testing import assert_frame_equal
 
 from orderflow import eventstudy
 from orderflow.config import IS_END, OOS_START
@@ -120,6 +121,35 @@ def test_purge_ok_true_just_inside_oos_with_runway():
     row = out.row(0, named=True)
     assert row["segment"] == "OOS"
     assert row["purge_ok"] is True  # plenty of OOS bars remain in this fixture
+
+
+def test_in_sample_forward_returns_match_full_store_path_and_never_read_oos_prices():
+    """add_in_sample_forward_returns (drop OOS before computing returns) must
+    hand the IS statistics exactly the rows the full-store path (compute on
+    all bars, then keep segment=='IS' & purge_ok) did, and no OOS price may
+    change anything it returns."""
+    bars = _bars_spanning_boundary()
+    horizons = [1, 3, 6, 12, 48]
+    # every 7th bar: IS events well inside, IS events within 48 bars of the
+    # boundary (purged), and OOS events
+    ev = pl.concat(
+        [_event(i, bars["bar_ts"][i], direction=1 if i % 2 else -1, magnitude=float(i)) for i in range(0, bars.height, 7)]
+    )
+
+    full_store = eventstudy.add_forward_returns(ev, bars, horizons=horizons)
+    old_is = full_store.filter((pl.col("segment") == "IS") & pl.col("purge_ok"))
+    new_all = eventstudy.add_in_sample_forward_returns(ev, bars, horizons=horizons)
+    new_is = new_all.filter((pl.col("segment") == "IS") & pl.col("purge_ok"))
+
+    assert old_is.height > 0
+    assert (full_store["segment"] == "OOS").any() and not (full_store["segment"] == "IS").all()
+    assert (new_all["segment"] == "IS").all()  # OOS events never reach the return computation
+    assert_frame_equal(new_is, old_is)
+
+    oos_bar = pl.col("bar_ts") >= OOS_START
+    scrambled = bars.with_columns(pl.when(oos_bar).then(pl.col("open") * 1000.0).otherwise(pl.col("open")).alias("open"))
+    assert not eventstudy.add_forward_returns(ev, scrambled, horizons=horizons).equals(full_store)  # OOS prices are visible to the full-store path
+    assert_frame_equal(eventstudy.add_in_sample_forward_returns(ev, scrambled, horizons=horizons), new_all)
 
 
 def test_year_consistency_two_of_three_positive():

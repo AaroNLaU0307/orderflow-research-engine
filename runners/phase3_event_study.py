@@ -136,11 +136,13 @@ def run() -> None:
         bear = all_events.filter((pl.col("signal") == sig) & (pl.col("direction") == -1)).height
         log(f"    {sig}: raw={raw:,} -> final={final:,} (bull={bull:,}, bear={bear:,})")
 
-    log("Computing forward returns + segment purging...")
-    all_events = eventstudy.add_forward_returns(all_events, bars, horizons=HORIZONS_BARS)
-    all_events = quarantine.null_returns_overlapping_quarantine(all_events, SYMBOL, bars, HORIZONS_BARS, BAR_MS, qwindows)
+    # OOS events and bars are dropped before any forward return is computed
+    # (event detection above still spans all 48 months, for the event counts).
+    log("Computing forward returns (in-sample events and bars only) + segment purging...")
+    is_candidates = eventstudy.add_in_sample_forward_returns(all_events, bars, horizons=HORIZONS_BARS)
+    is_candidates = quarantine.null_returns_overlapping_quarantine(is_candidates, SYMBOL, bars, HORIZONS_BARS, BAR_MS, qwindows)
 
-    is_events = all_events.filter((pl.col("segment") == "IS") & pl.col("purge_ok"))
+    is_events = is_candidates.filter((pl.col("segment") == "IS") & pl.col("purge_ok"))
     log(f"  {is_events.height:,} BTC in-sample events survive purging")
 
     # 20-cell family: 4 signals x 5 horizons, BTC IS only. Precision

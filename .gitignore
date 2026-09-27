@@ -5,3 +5,4 @@ data/*
 !data/manifest.json
 *.zip
 .pytest_cache/
+.ruff_cache/

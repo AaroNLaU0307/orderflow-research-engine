@@ -1,5 +1,9 @@
+import asyncio
+import json
 import sys
 from pathlib import Path
+
+import polars as pl
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "collector"))
 
@@ -57,3 +61,60 @@ def test_record_event_and_flush(tmp_path):
     df = pl.read_parquet(files[0])
     assert df.height == 1
     assert df["final_update_id"][0] == 5
+
+
+class _FakeDepthStream:
+    """Stands in for the websocket: serves the given messages, then behaves
+    like an idle stream (recv times out) - no network."""
+
+    def __init__(self, messages: list[str]):
+        self._messages = list(messages)
+
+    async def __aenter__(self):
+        return self
+
+    async def __aexit__(self, *exc):
+        return False
+
+    async def recv(self) -> str:
+        await asyncio.sleep(0.01)
+        if self._messages:
+            return self._messages.pop(0)
+        raise asyncio.TimeoutError
+
+
+def test_run_persists_rest_snapshot_book(tmp_path, monkeypatch):
+    """The REST snapshot is the starting book the diffs are applied to; a
+    level resting unchanged after it never appears in a diff, so the
+    snapshot itself (not just its lastUpdateId) must be written to disk."""
+    snapshot = {
+        "lastUpdateId": 108,
+        "E": 1_000,
+        "T": 999,
+        "bids": [["100.0", "1.5"], ["99.9", "2.0"]],
+        "asks": [["100.1", "0.7"]],
+    }
+    diffs = [
+        {"E": 1_001, "T": 1_000, "U": 100, "u": 105, "pu": 99, "b": [], "a": []},  # stale: u <= 108
+        {"E": 1_002, "T": 1_001, "U": 106, "u": 110, "pu": 105, "b": [["100.0", "0"]], "a": []},  # straddles 109
+        {"E": 1_003, "T": 1_002, "U": 111, "u": 120, "pu": 110, "b": [], "a": [["100.2", "3.0"]]},
+    ]
+    messages = [json.dumps({"stream": "btcusdt@depth@100ms", "data": d}) for d in diffs]
+    monkeypatch.setattr("websockets.connect", lambda url: _FakeDepthStream(messages))
+    recorder = DepthRecorder("BTCUSDT", tmp_path, flush_every=500)
+    monkeypatch.setattr(recorder, "fetch_snapshot", lambda: snapshot)
+
+    n = asyncio.run(recorder.run(max_events=2, max_seconds=5))
+
+    assert n == 2
+    snapshot_files = list(tmp_path.glob("BTCUSDT_snapshot_*.parquet"))
+    assert len(snapshot_files) == 1
+    saved = pl.read_parquet(snapshot_files[0])
+    assert saved.height == 1
+    row = saved.row(0, named=True)
+    assert row["last_update_id"] == 108
+    assert json.loads(row["bids"]) == snapshot["bids"]
+    assert json.loads(row["asks"]) == snapshot["asks"]
+    assert (row["event_time_ms"], row["transact_time_ms"]) == (1_000, 999)
+    diffs_saved = pl.concat([pl.read_parquet(f) for f in tmp_path.glob("BTCUSDT_depth_*.parquet")])
+    assert diffs_saved["first_update_id"].to_list() == [106, 111]

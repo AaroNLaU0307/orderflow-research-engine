@@ -435,8 +435,10 @@ def write_markdown_report(
         f"**Seed-invariance {'HOLDS' if all_match else 'FAILS'}**: the BH-significant set is "
         f"{'identical' if all_match else 'NOT identical'} across all 3 seeds. "
         + (
-            "This is expected at 2,000,000 reps for a result this far from the FDR boundary in either "
-            "direction; it does not by itself mean p-values/CIs are bit-identical across seeds (they are "
+            "The nearest misses sit close to the FDR boundary (smallest BH-adjusted q just above "
+            "q = 0.10), so this stability is what the 2,000,000 reps were raised to establish; at the "
+            "pre-registered 10,000 reps the call was seed-sensitive (preregistration/DEVIATIONS.md "
+            "entry 3). It does not by itself mean p-values/CIs are bit-identical across seeds (they are "
             "not - that would indicate a seeding bug, not precision), only that the qualitative "
             "significant/not-significant call for every cell is stable."
             if all_match

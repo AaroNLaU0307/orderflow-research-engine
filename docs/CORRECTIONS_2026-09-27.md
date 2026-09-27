@@ -73,3 +73,18 @@ out-of-sample included (the "Final" column matches the row sums of
 in-sample counts behind the gates are the N column of the Cells table
 (H3 62, H6 286, both below the 300-event gate). No out-of-sample return
 statistic appears in this or any other committed artifact.
+
+## 5. The seed-invariance note is not "far from the FDR boundary"
+
+Corrects: `reports/event_study_btc.md`, "Seed invariance" section ("This is
+expected at 2,000,000 reps for a result this far from the FDR boundary in
+either direction").
+
+The nearest misses are close to the boundary: H1 at 30m and 1h share the
+smallest BH-adjusted q, 0.109, against q = 0.10
+(`reports/event_study_btc_cells.csv`), and at the pre-registered 10,000
+reps one unseeded run crossed it
+([`preregistration/DEVIATIONS.md`](../preregistration/DEVIATIONS.md) entry
+3). The seed-invariance result at 2,000,000 reps stands; the reason given
+for expecting it does not. `runners/phase3_event_study.py` now writes the
+corrected sentence.

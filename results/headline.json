@@ -9,7 +9,7 @@
       "section": "archive",
       "hypothesis": "Order-flow footprint signals (4 tested; 2 data-blocked, disclosed)",
       "verdict": "null (H1, H2); underpowered (H3, H6)",
-      "verdict_detail": "pre-registered outcome (a) informational null for H1 and H2 (fail BH-FDR); outcome (c) underpowered for H3 and H6 (62 and 286 in-sample events, below the 300-event gate); H4 and H5 data-blocked, untested",
+      "verdict_detail": "the pre-registration's outcome classes: H1 and H2 fail BH-FDR; H3 and H6 fall below the 300-event gate; H4 and H5 are data-blocked and untested",
       "mechanism": "best cell ~2 bp gross vs 18 bp materiality bar (1.5× ~12 bp round-trip cost); no OOS return statistic computed or reported",
       "stats": [
         {

@@ -1,0 +1,4 @@
+# Provenance records are committed byte-for-byte as written on the owner machine
+# (CRLF included), so their sha256 matches the original files.
+data/quarantine_windows.json -text
+data/qa_*.jsonl -text

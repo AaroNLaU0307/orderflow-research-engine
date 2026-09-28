@@ -88,3 +88,17 @@ reps one unseeded run crossed it
 3). The seed-invariance result at 2,000,000 reps stands; the reason given
 for expecting it does not. `runners/phase3_event_study.py` now writes the
 corrected sentence.
+
+## 6. 2026-09-28: `data/quarantine_windows.json` is now committed
+
+Resolves the quarantine part of section 3.
+
+The file is committed as it was on the owner machine, byte for byte
+(`.gitattributes` marks it `-text` so line endings are not rewritten).
+sha256 `0daefc35b810beab7df0f609320159eafd3c70403fc59e895ab4afb50b862dd6`.
+It holds one window per symbol, both on 2022-09-06, with the bounds and
+reasons as written when the quarantine was applied; no value in it was
+changed. The loader still fails closed when the file is absent
+(`tests/test_quarantine.py::test_load_quarantine_windows_missing_file_fails_closed`),
+and two new tests load the committed file through the default path the
+runners use.

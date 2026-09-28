@@ -1,8 +1,8 @@
 """Quarantine windows: time ranges where the raw data has a confirmed
 upstream gap (present in both the monthly AND daily Binance archives, so
 not repairable by re-splicing). The windows are read from
-data/quarantine_windows.json, a local file that is not yet committed to
-this repository. Bars overlapping a quarantine window are
+data/quarantine_windows.json (committed 2026-09-28; see
+docs/CORRECTIONS_2026-09-27.md section 6). Bars overlapping a quarantine window are
 excluded from event formation; any forward-return window overlapping one
 is nulled. This is intentionally separate from the ordinary zero-trade-bar
 forward-fill (footprint.py) - a quarantine window marks data we know is

@@ -1,0 +1,20 @@
+[
+  {
+    "symbol": "BTCUSDT",
+    "date": "2022-09-06",
+    "start_ms": 1662484476603,
+    "end_ms": 1662484857627,
+    "start_utc": "2022-09-06T17:14:36.603Z",
+    "end_utc": "2022-09-06T17:20:57.627Z",
+    "reason": "AGG_PARTIAL_GAP_UPSTREAM: gap present in BOTH the monthly and daily Binance archives (agg_trade_id jumps by 31646 across this window); ETHUSDT shows a gap ending within 10ms of this same window (17:20:57.617Z), consistent with a shared exchange-side event rather than an archive-generation artifact. Not repairable by re-splicing (daily archive has the same hole)."
+  },
+  {
+    "symbol": "ETHUSDT",
+    "date": "2022-09-06",
+    "start_ms": 1662484174244,
+    "end_ms": 1662484857617,
+    "start_utc": "2022-09-06T17:09:34.244Z",
+    "end_utc": "2022-09-06T17:20:57.617Z",
+    "reason": "AGG_PARTIAL_GAP_UPSTREAM: gap present in BOTH the monthly and daily Binance archives (agg_trade_id jumps by 94136 across this window); BTCUSDT shows a gap ending within 10ms of this same window (17:20:57.627Z), consistent with a shared exchange-side event rather than an archive-generation artifact. Not repairable by re-splicing (daily archive has the same hole)."
+  }
+]

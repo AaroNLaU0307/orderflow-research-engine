@@ -97,3 +97,35 @@ def test_null_returns_overlapping_quarantine():
     row = out.row(0, named=True)
     assert row["r_1"] is not None  # h=1 window (entry=bar3..target=bar4) doesn't reach bar 5
     assert row["r_6"] is None  # h=6 window (entry=bar3..target=bar9) overlaps quarantined bar 5
+
+
+def test_committed_quarantine_file_loads_the_2022_09_06_windows():
+    """The committed data/quarantine_windows.json is what the runners load by
+    default. It must parse, cover both symbols, and place every window
+    inside 2022-09-06 UTC (the upstream Binance archive gap)."""
+    assert quarantine.DEFAULT_PATH.exists()
+    windows = quarantine.load_quarantine_windows()
+    assert set(windows) == {"BTCUSDT", "ETHUSDT"}
+    day_start = int(dt.datetime(2022, 9, 6, tzinfo=UTC).timestamp() * 1000)
+    day_end = day_start + 24 * 60 * 60 * 1000
+    for sym_windows in windows.values():
+        assert len(sym_windows) == 1
+        for start_ms, end_ms in sym_windows:
+            assert day_start <= start_ms < end_ms <= day_end
+
+
+def test_committed_quarantine_file_drops_an_event_inside_the_window():
+    """End-to-end with the committed windows: an event whose 5m trigger bar
+    overlaps the window is dropped; one a day later is kept."""
+    windows = quarantine.load_quarantine_windows()
+    bar_ms = 5 * 60_000
+    (start_ms, _), = windows["BTCUSDT"]
+    bar_start = dt.datetime.fromtimestamp(start_ms // bar_ms * bar_ms / 1000, tz=UTC)
+    events = _events(
+        [
+            (1, bar_start, "H1", 1, 1.0),
+            (2, bar_start + dt.timedelta(days=1), "H1", 1, 1.0),
+        ]
+    )
+    out = quarantine.filter_quarantined_events(events, "BTCUSDT", bar_ms, windows)
+    assert out["bar_index"].to_list() == [2]

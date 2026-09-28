@@ -130,3 +130,29 @@ records.
 The ETHUSDT 2023-05 repair step itself is still not committed: the raw
 zips it read were deleted after staging, so a runner cannot yet be shown
 to reproduce the staged file byte for byte without re-downloading them.
+
+## 8. 2026-09-28: the out-of-sample guard reproduces the committed results on real data
+
+Confirms, on the full dataset, the Phase 2 change to `runners/phase3_event_study.py` that drops
+out-of-sample events and bars before any forward return is computed. It had been checked only
+on a synthetic test.
+
+The runner was re-run on the owner machine at commit `c3807e9`, writing to a scratch directory
+so the committed reports were not touched. Between that commit and this entry, `runners/` is
+unchanged and `src/` differs only in a docstring. Inputs:
+`data/parquet/BTCUSDT/bars.parquet` (sha256 `0b7f68f83a4b31b254f8db0a2136e0c79b3166859840511d5947beb765f94801`),
+`data/parquet/BTCUSDT/buckets.parquet` (sha256 `cd3d632d0c0959e1b493a46ebeb9f8ff55e5650b8cfc6263198448ffa1ef3e97`)
+and the committed `data/quarantine_windows.json` (section 6).
+
+With line endings normalised, the three CSVs it wrote are byte-identical to the committed ones,
+so the results reproduce exactly, not just within floating tolerance:
+
+| File | sha256 (committed and re-run) |
+|---|---|
+| `reports/event_study_btc_cells.csv` | `931b510928e51d60547bcc5b3e892437fa62a7484c9255ac859f694fcc21f0e0` |
+| `reports/event_study_btc_gates.csv` | `64b65456a1cae91adc56d52ef23b6e59b7d58b19037f46c7bd7ab4413d1c4613` |
+| `reports/event_study_btc_placebo_cells.csv` | `2e32b037ae3c87149d0b47fabe1c3edd3689d47038120a565d3d1e1e51cdaec1` |
+
+The regenerated `reports/event_study_btc.md` differs from the committed one in one sentence
+only: the seed-invariance sentence that section 5 corrects, which the runner now writes in its
+corrected form. The committed report is left as written. No number changes.

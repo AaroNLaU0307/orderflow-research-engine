@@ -25,6 +25,8 @@ Proof status (docs/CORRECTIONS_2026-09-27.md section 10): step 2 reproduces
 the stored files byte for byte. Step 1 does not, and cannot: the splice does
 not fix the order of same-millisecond trades, so two runs on the same zips
 differ in `open`/`close` of a few dozen bars and in float summation order.
+Since 2026-09-28 (section 12) the splice is deterministic, but it still will
+not reproduce the staged file, which was built before that fix.
 
 Modes:
   --verify (default, offline): hash the staged 2023-05 files; rebuild

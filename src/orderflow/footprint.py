@@ -30,9 +30,13 @@ def aggregate_month(trades: pl.DataFrame, delta: float, bar_ms: int = BAR_MS) ->
             pl.when(~pl.col("is_buyer_maker")).then(pl.col("quantity")).otherwise(0.0).alias("buy_vol"),
             pl.when(pl.col("is_buyer_maker")).then(pl.col("quantity")).otherwise(0.0).alias("sell_vol"),
         ]
-    ).sort("transact_time")
+    ).sort(["transact_time", "agg_trade_id"])
+    # Same-millisecond trades are ordered by agg_trade_id and every group_by
+    # keeps that order, so open/close (first/last price) and the sums do not
+    # depend on input order (CORRECTIONS section 12). Bars stored before
+    # 2026-09-28 were built without this.
 
-    buckets = df.group_by(["bar_ts_ms", "bucket_px"]).agg(
+    buckets = df.group_by(["bar_ts_ms", "bucket_px"], maintain_order=True).agg(
         [
             pl.col("buy_vol").sum().alias("buy_vol"),
             pl.col("sell_vol").sum().alias("sell_vol"),
@@ -40,7 +44,7 @@ def aggregate_month(trades: pl.DataFrame, delta: float, bar_ms: int = BAR_MS) ->
         ]
     )
 
-    bars = df.group_by("bar_ts_ms").agg(
+    bars = df.group_by("bar_ts_ms", maintain_order=True).agg(
         [
             pl.col("price").first().alias("open"),
             pl.col("price").max().alias("high"),

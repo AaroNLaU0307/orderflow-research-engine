@@ -336,9 +336,10 @@ the same-ID repair to the ten ETHUSDT 2023-05 days
 (`runners/phase2_backfill_gaps.py` repairs whole missing days only) is
 `runners/phase2_repair_eth_2023_05.py`. Its rebuild step reproduces the
 stored ETHUSDT bars byte for byte. Its splice step reproduces the staged
-month only up to the order of same-millisecond trades, which the pipeline
-does not fix (CORRECTIONS section 10,
-`reports/eth_2023_05_repair_proof.json`).
+month only up to the order of same-millisecond trades, which the ingestion
+did not fix when the stored bars were built (CORRECTIONS section 10,
+`reports/eth_2023_05_repair_proof.json`). Ingestion has been deterministic
+since 2026-09-28; the stored bars were not rebuilt (CORRECTIONS section 12).
 
 The reconciliation gate closed as **PASS-WITH-EXCEPTIONS**: every
 outstanding breach day resolved to either `KLINES_HOLE` (aggTrades

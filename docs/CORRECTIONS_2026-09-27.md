@@ -267,3 +267,52 @@ Run the suite, commit on audit-artifacts/2026-09-28. Push remains Aaron's
 to grant in this session; if granted, push only the three
 audit-artifacts/2026-09-28 branches.
 ```
+
+## 12. 2026-09-28: deterministic ingestion (addendum to section 10)
+
+Done under the delegate decision logged in section 11. Classification: IMPLEMENTATION_FIX for
+future ingestion. The stored parquet and every committed result stay as they are; nothing
+was re-ingested, and the splice was not re-run. `reports/eth_2023_05_repair_proof.json`
+remains the record of section 10.
+
+**Change.** The ingestion path now orders trades by `(transact_time, agg_trade_id)` before
+bar construction:
+- `etl.backfill_missing_days` keeps the first copy of an `agg_trade_id` in concatenation
+  order (`unique(..., keep="first", maintain_order=True)`) and sorts on both columns.
+- `footprint.aggregate_month` sorts on both columns, and both of its `group_by` calls, for
+  bars and for buckets, keep order.
+
+The fix covers two things. Which trade is a bar's first or last (its open/close) no longer
+depends on input order, and neither does the order of the float sums.
+`tests/test_ingest_determinism.py` shuffles a synthetic set of same-millisecond trades and
+checks that ingestion produces byte-identical bars and buckets, directly and through the
+backfill path. It also checks the tie rule for open/close. Three of its four tests fail on
+the previous code.
+
+Not changed:
+- `footprint.finalize_symbol_bars` / `finalize_symbol_buckets`. The rebuild is already
+  byte-for-byte reproducible (section 10).
+- `footprint.rebucket` / `rebar`. They derive the sensitivity grids from the stored parquet,
+  outside ingestion. `rebar`'s bar `group_by` already keeps order, and their bucket
+  `group_by` calls are followed by a sort. Their float tails were not tested for determinism.
+
+**Status of the stored bars.** Every stored bar (`data/parquet`, `data/staging`) was built by
+the pre-fix ingestion. A re-ingest of the same archives under the fixed code will be
+deterministic. It may still differ from the stored bars in `open`/`close` for a small number
+of bars and in float tails, as section 10 shows for ETHUSDT 2023-05. The committed results
+are unaffected: every runner reads the stored parquet, and section 8 reproduced the BTC
+results from it exactly. One runner re-ingests: `runners/phase3_sensitivity_stage.py` builds
+two configs (`delta10_bar5m`, `bar3m_delta25`) from the retained raw zips in
+`data/raw_retained/`. It stages into `data/parquet_sensitivity/`, and the committed
+`reports/sensitivity_grid*` come from that. Re-running that stage under the fixed code may
+therefore shift those two configs slightly. The committed grid stays as reported, and it was
+not re-run here.
+
+**Authority for the bytes.**
+- `data/manifest.json` is the authority for the raw archive bytes the stored bars were built
+  from: every zip's sha256 and size.
+- It does not hash the stored parquet files. The parquet hashes on record are in
+  `runners/phase2_repair_eth_2023_05.py` (`EXPECTED_SHA256`: ETHUSDT bars and buckets, and
+  the staged 2023-05 month) and in section 8 (BTCUSDT bars and buckets).
+- For bar values, the stored parquet files themselves are the reference. A re-ingest does not
+  replace them.

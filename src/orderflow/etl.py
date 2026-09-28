@@ -314,7 +314,14 @@ def backfill_missing_days(
         frames.append(day_trades)
         zip_path.unlink(missing_ok=True)
         csv_path.unlink(missing_ok=True)
-    combined = pl.concat(frames).unique(subset=["agg_trade_id"]).sort("transact_time")
+    # Deterministic order (CORRECTIONS section 12): keep the first copy of an
+    # agg_trade_id in concat order, and break same-millisecond ties by
+    # agg_trade_id, so a re-run on the same zips yields identical trades.
+    combined = (
+        pl.concat(frames)
+        .unique(subset=["agg_trade_id"], keep="first", maintain_order=True)
+        .sort(["transact_time", "agg_trade_id"])
+    )
     return combined, still_missing
 
 

@@ -322,7 +322,9 @@ by splicing in the daily files.
 **Provenance.** `data/manifest.json` records the sha256, byte size, and
 ingestion timestamp of every file this pipeline ever downloaded,
 including both the original monthly zip and any daily backfill zips for
-a repaired month. `data/qa_backfill_log.jsonl` and
+a repaired month. Its `stored_parquet` section also pins the sha256 of the
+stored BTCUSDT and ETHUSDT `bars.parquet` / `buckets.parquet` every runner reads.
+`data/qa_backfill_log.jsonl` and
 `data/qa_breach_classification.jsonl` are the per-month and per-day
 record of what was found and how it was resolved; `reports/QA_SUMMARY.md`'s
 classification table and totals are generated from them. Those two logs,

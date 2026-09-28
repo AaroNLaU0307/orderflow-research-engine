@@ -9964,5 +9964,27 @@
     "ingested_at": "2026-07-02T09:31:17.602308+00:00",
     "sha256": "",
     "status": "missing_404"
+  },
+  "stored_parquet": {
+    "data/parquet/BTCUSDT/bars.parquet": {
+      "byte_size": 14953265,
+      "recorded_at": "2026-09-28T17:30:50Z",
+      "sha256": "0b7f68f83a4b31b254f8db0a2136e0c79b3166859840511d5947beb765f94801"
+    },
+    "data/parquet/BTCUSDT/buckets.parquet": {
+      "byte_size": 34310562,
+      "recorded_at": "2026-09-28T17:30:50Z",
+      "sha256": "cd3d632d0c0959e1b493a46ebeb9f8ff55e5650b8cfc6263198448ffa1ef3e97"
+    },
+    "data/parquet/ETHUSDT/bars.parquet": {
+      "byte_size": 15433497,
+      "recorded_at": "2026-09-28T17:30:50Z",
+      "sha256": "2875bce06420e1271ea9dd78efed8d15d0e786d78f7fe43310f8f2fd494a5253"
+    },
+    "data/parquet/ETHUSDT/buckets.parquet": {
+      "byte_size": 45745562,
+      "recorded_at": "2026-09-28T17:30:50Z",
+      "sha256": "ebc41b3abe84e90ad57547fefb5eba5c63dbacfe0cae66e6121b9fc16331d0c6"
+    }
   }
 }

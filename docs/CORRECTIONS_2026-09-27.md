@@ -316,3 +316,16 @@ not re-run here.
   the staged 2023-05 month) and in section 8 (BTCUSDT bars and buckets).
 - For bar values, the stored parquet files themselves are the reference. A re-ingest does not
   replace them.
+
+## 13. 2026-09-28: `data/manifest.json` now pins the stored parquet (addendum to section 12)
+
+Section 12's "It does not hash the stored parquet files" is superseded. `data/manifest.json`
+has a new top-level `stored_parquet` section with the sha256 and byte size of
+`data/parquet/BTCUSDT/{bars,buckets}.parquet` and `data/parquet/ETHUSDT/{bars,buckets}.parquet`.
+These are the bytes every runner reads, hashed from the files on the owner machine. They
+equal the hashes already recorded in section 8 and in the repair runner's `EXPECTED_SHA256`.
+The zip entries are unchanged: the diff only adds lines. The manifest is therefore the
+authority for both the raw archive bytes and the stored bars.
+`tests/test_manifest_stored_parquet.py` recomputes the four hashes from the files; that test
+is marked `data` and skipped where the store is absent. `runners/phase2_qa.py` counts only
+zip entries as "Manifest entries", so the section does not change that count.

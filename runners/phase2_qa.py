@@ -56,7 +56,8 @@ def check_manifest_completeness() -> dict:
                 elif entry["status"] not in ("ok", "missing_404"):
                     missing.append(url)
     return {
-        "n_manifest_entries": len(manifest),
+        # zip entries only; "stored_parquet" pins the built store, not a download
+        "n_manifest_entries": sum(1 for k in manifest if k != "stored_parquet"),
         "n_expected_month_files": len(SYMBOLS) * 3 * len(months),
         "missing_or_unrecorded": missing,
         "checksum_failures": checksum_failures,

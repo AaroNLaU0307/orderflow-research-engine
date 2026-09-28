@@ -334,7 +334,11 @@ sections 6-7, which also note that the backfill log's ETHUSDT 2023-05 row
 records an earlier attempt, not the final repair). The step that applied
 the same-ID repair to the ten ETHUSDT 2023-05 days
 (`runners/phase2_backfill_gaps.py` repairs whole missing days only) is
-not yet in this repository; publishing it is pending.
+`runners/phase2_repair_eth_2023_05.py`. Its rebuild step reproduces the
+stored ETHUSDT bars byte for byte. Its splice step reproduces the staged
+month only up to the order of same-millisecond trades, which the pipeline
+does not fix (CORRECTIONS section 10,
+`reports/eth_2023_05_repair_proof.json`).
 
 The reconciliation gate closed as **PASS-WITH-EXCEPTIONS**: every
 outstanding breach day resolved to either `KLINES_HOLE` (aggTrades

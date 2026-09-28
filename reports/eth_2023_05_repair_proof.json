@@ -1,0 +1,176 @@
+{
+  "zips": {
+    "ETHUSDT-aggTrades-2023-05.zip": {
+      "sha256": "0a7b6b97ad29f9879fbb9e62c02496e31aa92ad1680e3faec787600b0faa995a",
+      "matches_manifest": true
+    },
+    "ETHUSDT-aggTrades-2023-05-01.zip": {
+      "sha256": "aa94068b7388aea6a56fd6e22a9b39c4c5775840303838be814d0a4a314772ca",
+      "matches_manifest": true
+    },
+    "ETHUSDT-aggTrades-2023-05-02.zip": {
+      "sha256": "5ef0e0cdcfe2dfa03b8f0a65d694c4f34f44d74f931f062cd4574fea8a5246ff",
+      "matches_manifest": true
+    },
+    "ETHUSDT-aggTrades-2023-05-03.zip": {
+      "sha256": "1556360810d099293877f245117ebf9f80fa7c8b2c004e8f4bd607581d6a3db7",
+      "matches_manifest": true
+    },
+    "ETHUSDT-aggTrades-2023-05-04.zip": {
+      "sha256": "b3853f9e2a298f051567c5757173e5bb93fecd042d29c1213e7b89ed5061601b",
+      "matches_manifest": true
+    },
+    "ETHUSDT-aggTrades-2023-05-05.zip": {
+      "sha256": "a2128cd221a78ac74fc9e66c47dfbf39eaa196d8f2ad9c979bc9004d7ab34afd",
+      "matches_manifest": true
+    },
+    "ETHUSDT-aggTrades-2023-05-07.zip": {
+      "sha256": "976a8188a8758fe57509cbe0da9baaaf2309896437b94cbebeaa4f6d059de472",
+      "matches_manifest": true
+    },
+    "ETHUSDT-aggTrades-2023-05-08.zip": {
+      "sha256": "3320f8dcec21f5752c9de7dccdac63ab0b6ae8f64a413e470e63275f36715f31",
+      "matches_manifest": true
+    },
+    "ETHUSDT-aggTrades-2023-05-09.zip": {
+      "sha256": "616b1f9b5d01ce608b8d394d5a2f3e40c3e2b7c23cbecfdf2909701d12d31cc4",
+      "matches_manifest": true
+    },
+    "ETHUSDT-aggTrades-2023-05-10.zip": {
+      "sha256": "ed1e77848dc5104884e03abc1893ac9a427e9a16330c8493548b7d4b3c920bf5",
+      "matches_manifest": true
+    },
+    "ETHUSDT-aggTrades-2023-05-11.zip": {
+      "sha256": "cb87ab8d6375e28c38d497437d2549e08e412233f51d8481af2189b45443453f",
+      "matches_manifest": true
+    },
+    "ETHUSDT-aggTrades-2023-05-13.zip": {
+      "sha256": "5c61d0222f55eafc62c90e2803a1b141717a33efff339508e8d358f2a72aedce",
+      "matches_manifest": true
+    }
+  },
+  "runs": [
+    {
+      "repair_result": {
+        "n_trades": 25048194,
+        "n_bars": 8928,
+        "still_missing": []
+      },
+      "files": {
+        "staging/ETHUSDT/2023-05_bars.parquet": {
+          "sha256": "4be0630471b709c79c6dcf5e67e0abcab9368b8db5a4812626bde9b8d8a52d93",
+          "byte_identical_to_staged": false,
+          "content_vs_staged": {
+            "rows": [
+              8928,
+              8928
+            ],
+            "keys_equal": true,
+            "columns": {
+              "open": {
+                "n_rows_differ": 62,
+                "max_abs_diff": 0.15000000000009095
+              },
+              "close": {
+                "n_rows_differ": 47,
+                "max_abs_diff": 0.08999999999991815
+              },
+              "volume": {
+                "n_rows_differ": 147,
+                "max_abs_diff": 2.9103830456733704e-11
+              },
+              "delta": {
+                "n_rows_differ": 321,
+                "max_abs_diff": 1.4551915228366852e-11
+              }
+            },
+            "identical_after_sort": false
+          }
+        },
+        "staging/ETHUSDT/2023-05_buckets.parquet": {
+          "sha256": "db5e61c554be9e9fa5728d62d28e07dcdcb82ae617895c5f19f1387c48e8a76d",
+          "byte_identical_to_staged": false,
+          "content_vs_staged": {
+            "rows": [
+              34272,
+              34272
+            ],
+            "keys_equal": true,
+            "columns": {
+              "buy_vol": {
+                "n_rows_differ": 4865,
+                "max_abs_diff": 2.000888343900442e-11
+              },
+              "sell_vol": {
+                "n_rows_differ": 4775,
+                "max_abs_diff": 5.4569682106375694e-12
+              }
+            },
+            "identical_after_sort": false
+          }
+        }
+      }
+    },
+    {
+      "repair_result": {
+        "n_trades": 25048194,
+        "n_bars": 8928,
+        "still_missing": []
+      },
+      "files": {
+        "staging/ETHUSDT/2023-05_bars.parquet": {
+          "sha256": "51a85dc25f50f891a443b701faf6bc130ff4a3f8d589333e743ef1d43ef6f082",
+          "byte_identical_to_staged": false,
+          "content_vs_staged": {
+            "rows": [
+              8928,
+              8928
+            ],
+            "keys_equal": true,
+            "columns": {
+              "open": {
+                "n_rows_differ": 53,
+                "max_abs_diff": 0.12000000000011823
+              },
+              "close": {
+                "n_rows_differ": 58,
+                "max_abs_diff": 0.11999999999989086
+              },
+              "volume": {
+                "n_rows_differ": 153,
+                "max_abs_diff": 2.9103830456733704e-11
+              },
+              "delta": {
+                "n_rows_differ": 336,
+                "max_abs_diff": 7.275957614183426e-12
+              }
+            },
+            "identical_after_sort": false
+          }
+        },
+        "staging/ETHUSDT/2023-05_buckets.parquet": {
+          "sha256": "8730d3e254d49041bd6a0f505561dc3293f7e2b5e07424d88bc296485d1dee20",
+          "byte_identical_to_staged": false,
+          "content_vs_staged": {
+            "rows": [
+              34272,
+              34272
+            ],
+            "keys_equal": true,
+            "columns": {
+              "buy_vol": {
+                "n_rows_differ": 4795,
+                "max_abs_diff": 1.4551915228366852e-11
+              },
+              "sell_vol": {
+                "n_rows_differ": 4676,
+                "max_abs_diff": 5.4569682106375694e-12
+              }
+            },
+            "identical_after_sort": false
+          }
+        }
+      }
+    }
+  ]
+}

@@ -198,3 +198,41 @@ Then run each repo's suite and commit. Push remains Aaron's to grant
 in this session; if granted, push only the three
 audit-artifacts/2026-09-28 branches.
 ```
+
+## 10. 2026-09-28: the ETHUSDT 2023-05 repair runner (addendum to section 7)
+
+Done under the delegate decision logged in section 9. Section 7's last paragraph ("still not
+committed") is superseded by this one.
+
+`runners/phase2_repair_eth_2023_05.py` is committed. It repeats the two inline commands of
+2026-07-02: step 1 is the splice (`repair_month`), step 2 the rebuild (`finalize_symbol`).
+Evidence is in `reports/eth_2023_05_repair_proof.json`, written by `--splice-from`.
+
+- **Inputs.** The monthly zip and the 11 daily zips were downloaded again from
+  data.binance.vision on 2026-09-28. All 12 match `data/manifest.json` in sha256 and byte
+  size (`zips` in the proof file). They were deleted after the runs and are not in the
+  repository.
+- **Step 2, the rebuild: proven.** Rebuilding `data/parquet/ETHUSDT` from the staged files
+  reproduces `bars.parquet` and `buckets.parquet` byte for byte (`--verify`).
+- **Step 1, the splice: not proven byte for byte, and cannot be.** The splice was run twice
+  on the verified zips, with staging redirected to a temporary directory. Neither run is
+  byte-identical to the staged file, and the two runs differ from each other (four different
+  sha256 values in `runs`). Sorted by key, each run has the staged file's rows and keys. The
+  `high`, `low` and `trade_count` columns are identical. The `volume`, `delta`, `buy_vol` and
+  `sell_vol` columns differ by at most about 3e-11, which is summation order. The `open` and
+  `close` columns differ in a few dozen bars each, by up to 0.15 (per-run counts are in the
+  file). REASONED cause: the pipeline does not fix the order of trades that share a
+  millisecond. `etl.backfill_missing_days` calls `unique(subset=["agg_trade_id"])` without
+  `maintain_order`, then sorts on `transact_time`. The `first()` and `last()` price of a bar
+  then depend on how ties fall, and `group_by` output order is not fixed either. The staged
+  file of 2026-07-02 is one outcome of that process.
+
+**Wider finding, not fixed here.** `open` and `close` feed H1 and the event-study entry
+price (`src/orderflow/eventstudy.py`). Any month re-ingested from the raw archives may
+therefore differ in those columns from the stored bars. For a month that goes through
+`backfill_missing_days` this is shown above; for an ordinary month it is possible, because
+`footprint.aggregate_month` also sorts on `transact_time`, but it is untested. The committed
+results are unaffected: every runner reads the stored `data/parquet` files, and section 8
+reproduced the BTC results from them exactly. Making ingestion deterministic, for example by
+sorting on `agg_trade_id` within `transact_time`, would change stored bars. That makes it a
+data fix for the delegate to classify, not part of this item.

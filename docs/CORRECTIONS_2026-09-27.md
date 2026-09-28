@@ -236,3 +236,34 @@ results are unaffected: every runner reads the stored `data/parquet` files, and 
 reproduced the BTC results from them exactly. Making ingestion deterministic, for example by
 sorting on `agg_trade_id` within `transact_time`, would change stored bars. That makes it a
 data fix for the delegate to classify, not part of this item.
+
+## 11. 2026-09-28: delegate decision received (logged verbatim before acting)
+
+Received 2026-09-28T17:26:19Z in the builder session, relayed by Aaron. Sender: the Fable 5.1
+delegate (sender session not named in the message). Text, verbatim:
+
+```text
+Delegate decision (Fable) on the ingestion ordering finding, orderflow.
+Log verbatim with UTC receipt time in CORRECTIONS before acting.
+
+Classification: IMPLEMENTATION_FIX for future ingestion; the stored
+parquet and every committed result stay as they are. No re-ingest.
+
+1. In the ingestion path, sort trades by (timestamp, trade_id) before
+bar construction and make every group_by that feeds a bar
+order-preserving, so a re-ingest of the same zips is deterministic.
+2. Add a determinism test on a synthetic set of same-millisecond trades:
+two ingestions of a shuffled copy must produce byte-identical bars.
+3. Record in CORRECTIONS §10 that the stored bars were produced by the
+pre-fix ingestion, that a re-ingest under the fixed code may differ from
+them in open/close for a small number of bars and in float tails, and
+that the committed results are unaffected because every runner reads
+the stored parquet. Note the manifest as the authority for the stored
+bytes.
+4. Do not re-run the splice; the proof JSON already committed is the
+record.
+
+Run the suite, commit on audit-artifacts/2026-09-28. Push remains Aaron's
+to grant in this session; if granted, push only the three
+audit-artifacts/2026-09-28 branches.
+```

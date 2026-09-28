@@ -102,3 +102,31 @@ changed. The loader still fails closed when the file is absent
 (`tests/test_quarantine.py::test_load_quarantine_windows_missing_file_fails_closed`),
 and two new tests load the committed file through the default path the
 runners use.
+
+## 7. 2026-09-28: the QA JSONL logs are now committed
+
+Resolves the log part of section 3. Committed byte for byte, as on the
+owner machine (`.gitattributes` marks them `-text`):
+
+| File | sha256 |
+|---|---|
+| `data/qa_ingest_log.jsonl` | `85c0f7948a8e298df7fae1f885499666a7a6777656bb9f52401dc57f689731ac` |
+| `data/qa_backfill_log.jsonl` | `dff09a32dc2f33f3199c61d09a43ae81d90f9cc4cb99b11db785c49fd203a1eb` |
+| `data/qa_breach_classification.jsonl` | `a2d5b324d35381aa437248b77f627c8441ea78f9b71d26b9377abd135cebc660` |
+
+No line in them was changed. One row needs a note. The ETHUSDT 2023-05 row
+of `qa_backfill_log.jsonl` whose `repair_type` is `AGG_STALE_REVISION`
+was appended by hand in the build session (2026-07-02T14:09:59Z), after
+a first repair attempt that left out day 10 and still merged by
+`agg_trade_id`. Its `result` (`n_bars` 8640, `n_trades` 23736591)
+describes that attempt. The repair that produced the staged data the
+study used ran at 14:23:22Z with day 10 included and the replace-by-day
+fix in `etl.backfill_missing_days`, and was not logged. The staged
+`data/staging/ETHUSDT/2023-05_bars.parquet` it wrote has 8,928 bars, a
+full 31-day month. The row's `repair_type` was also relabelled in place
+from `AGG_PARTIAL_GAP` on 2026-07-02, as the message of commit `e4a5d09`
+records.
+
+The ETHUSDT 2023-05 repair step itself is still not committed: the raw
+zips it read were deleted after staging, so a runner cannot yet be shown
+to reproduce the staged file byte for byte without re-downloading them.

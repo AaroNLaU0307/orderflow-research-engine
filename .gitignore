@@ -4,6 +4,9 @@ __pycache__/
 data/*
 !data/manifest.json
 !data/quarantine_windows.json
+!data/qa_ingest_log.jsonl
+!data/qa_backfill_log.jsonl
+!data/qa_breach_classification.jsonl
 *.zip
 .pytest_cache/
 .ruff_cache/

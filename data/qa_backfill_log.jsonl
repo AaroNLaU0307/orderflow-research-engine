@@ -1,0 +1,11 @@
+{"month": 8, "original_missing_days": [28, 29, 30], "result": {"n_bars": 8928, "n_trades": 44534075, "still_missing": []}, "still_missing": [], "symbol": "BTCUSDT", "year": 2022}
+{"month": 9, "original_missing_days": [1, 10], "result": {"n_bars": 8639, "n_trades": 42362890, "still_missing": []}, "still_missing": [], "symbol": "BTCUSDT", "year": 2022}
+{"month": 10, "original_missing_days": [29], "result": {"n_bars": 8928, "n_trades": 28597576, "still_missing": []}, "still_missing": [], "symbol": "BTCUSDT", "year": 2022}
+{"month": 11, "original_missing_days": [7, 14], "result": {"n_bars": 8640, "n_trades": 36885751, "still_missing": []}, "still_missing": [], "symbol": "BTCUSDT", "year": 2022}
+{"month": 5, "original_missing_days": [9], "result": {"n_bars": 8928, "n_trades": 36757013, "still_missing": []}, "still_missing": [], "symbol": "BTCUSDT", "year": 2023}
+{"month": 8, "original_missing_days": [28, 29, 30], "result": {"n_bars": 8928, "n_trades": 58131584, "still_missing": []}, "still_missing": [], "symbol": "ETHUSDT", "year": 2022}
+{"month": 9, "original_missing_days": [1], "result": {"n_bars": 8638, "n_trades": 49106687, "still_missing": []}, "still_missing": [], "symbol": "ETHUSDT", "year": 2022}
+{"month": 10, "original_missing_days": [29], "result": {"n_bars": 8928, "n_trades": 27948273, "still_missing": []}, "still_missing": [], "symbol": "ETHUSDT", "year": 2022}
+{"month": 11, "original_missing_days": [7, 14], "result": {"n_bars": 8640, "n_trades": 44954740, "still_missing": []}, "still_missing": [], "symbol": "ETHUSDT", "year": 2022}
+{"month": 5, "original_missing_days": [10], "result": {"n_bars": 8928, "n_trades": 25048194, "still_missing": []}, "still_missing": [], "symbol": "ETHUSDT", "year": 2023}
+{"month": 5, "original_missing_days": [1, 2, 3, 4, 5, 7, 8, 9, 11, 13], "repair_type": "AGG_STALE_REVISION splice (agg_trade_id contiguous; same-ID different-quantity value revision between monthly and daily archive generations, not missing trades)", "result": {"n_bars": 8640, "n_trades": 23736591, "still_missing": []}, "still_missing": [], "symbol": "ETHUSDT", "year": 2023}

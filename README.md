@@ -179,7 +179,7 @@ N/A rather than skipped.
 | Blind hold-out | **Held for returns, not for bars:** the 18-month OOS segment (2025-01-01 to 2026-06-30) is reserved and single-use, and no OOS return statistic was computed or reported, because nothing earned access. OOS bars were read for event detection and event counts, and the Phase 3 run behind the committed results computed per-event OOS forward returns in memory before filtering to in-sample; the runner now drops OOS events and bars before any forward return is computed. [`reports/FINAL_REPORT.md`](reports/FINAL_REPORT.md) section 3. |
 | Look-ahead / leakage tests | **Done:** a dedicated truncation-invariance pytest suite for every detector, plus a next-bar-open execution convention throughout (an event is only actionable using the bar close that revealed it). [`tests/test_truncation_invariance.py`](tests/test_truncation_invariance.py). |
 | Multiplicity control | **Done:** Benjamini-Hochberg FDR at q=0.10 over a declared, closed 20-cell family; total trial count N=140 declared for Deflated Sharpe Ratio purposes regardless of there being no promoted strategy to deflate. [`reports/event_study_btc.md`](reports/event_study_btc.md), [`reports/FINAL_REPORT.md`](reports/FINAL_REPORT.md) section 3. |
-| Reproducibility | **Done:** deterministic seeding throughout (`orderflow.stats.stable_seed`), byte-identical output across repeated runs, and - new in the precision amendment - BH-significance seed-invariance verified across 3 independent seeds at 2,000,000 reps. A full re-run also needs `data/quarantine_windows.json`, not yet in this repository (see Provenance below). [`preregistration/DEVIATIONS.md`](preregistration/DEVIATIONS.md) entries 1-3, [`reports/event_study_btc.md`](reports/event_study_btc.md) (Seed invariance section). |
+| Reproducibility | **Done:** deterministic seeding throughout (`orderflow.stats.stable_seed`), byte-identical output across repeated runs, and - new in the precision amendment - BH-significance seed-invariance verified across 3 independent seeds at 2,000,000 reps. A full re-run reads the committed `data/quarantine_windows.json` (see Provenance below). [`preregistration/DEVIATIONS.md`](preregistration/DEVIATIONS.md) entries 1-3, [`reports/event_study_btc.md`](reports/event_study_btc.md) (Seed invariance section). |
 
 ## Methodology
 
@@ -263,9 +263,8 @@ forward-return window overlapping it is nulled, horizon by horizon
 (`src/orderflow/quarantine.py`). This runs *before* deduplication, so a
 quarantined event can never have already suppressed a legitimate nearby
 one through the 6-bar dedup rule. The window bounds are read from
-`data/quarantine_windows.json`, which is not yet in this repository; the
-runners stop with an error when it is missing rather than silently
-running without the quarantine.
+`data/quarantine_windows.json`; the runners stop with an error when it is
+missing rather than silently running without the quarantine.
 
 **Costs.** 5bp taker fee + slippage (half-spread, negligible for BTC,
 plus a 1bp impact buffer) per side, ~12bp round trip; historical funding
@@ -327,10 +326,15 @@ a repaired month. `data/qa_backfill_log.jsonl` and
 `data/qa_breach_classification.jsonl` are the per-month and per-day
 record of what was found and how it was resolved; `reports/QA_SUMMARY.md`'s
 classification table and totals are generated from them. Those two logs,
-`data/quarantine_windows.json` (the 2022-09-06 window bounds) and the step
-that applied the same-ID repair to the ten ETHUSDT 2023-05 days
-(`runners/phase2_backfill_gaps.py` repairs whole missing days only) are
-not yet in this repository; publishing them is pending.
+`data/qa_ingest_log.jsonl` and `data/quarantine_windows.json` (the
+2022-09-06 window bounds) are committed byte for byte as written on the
+owner machine
+([`docs/CORRECTIONS_2026-09-27.md`](docs/CORRECTIONS_2026-09-27.md)
+sections 6-7, which also note that the backfill log's ETHUSDT 2023-05 row
+records an earlier attempt, not the final repair). The step that applied
+the same-ID repair to the ten ETHUSDT 2023-05 days
+(`runners/phase2_backfill_gaps.py` repairs whole missing days only) is
+not yet in this repository; publishing it is pending.
 
 The reconciliation gate closed as **PASS-WITH-EXCEPTIONS**: every
 outstanding breach day resolved to either `KLINES_HOLE` (aggTrades
@@ -387,9 +391,8 @@ python runners/phase5_figures.py                 # renders reports/figures/*.png
 The 7 `data`-marked tests read the Phase 0 sample files in `data/sample/`,
 which are not committed; without them a plain `pytest` shows 124 passed,
 7 skipped. `runners/phase3_event_study.py`, `runners/phase3_year_table.py`
-and `runners/phase5_figures.py` also need `data/quarantine_windows.json`
-(not yet in this repository - see Provenance above) and stop with an error
-without it.
+and `runners/phase5_figures.py` also read the committed
+`data/quarantine_windows.json` and stop with an error without it.
 
 Every `runners/phase*.py` script is independently re-runnable and
 regenerates its `reports/*.md` / `reports/*.csv` output deterministically
